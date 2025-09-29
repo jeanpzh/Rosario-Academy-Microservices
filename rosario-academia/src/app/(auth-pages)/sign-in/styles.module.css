@@ -1,0 +1,394 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Delius&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Delius&family=DynaPuff:wght@400..700&display=swap');
+
+.signInTitle {
+    font-size: 2rem;
+    margin-bottom: 2rem;
+}
+
+.signInContainer {
+    font-size: 35px;
+    font-weight: bold;
+    border-radius: 25px;
+    box-shadow: 0 14px 28px rgba(109, 108, 108, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+    position: relative;
+    overflow: hidden;
+    width: 768px;
+    max-width: 95%;
+    min-height: 500px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: hsl(var(--background));
+    opacity: 1.2;
+    color: hsl(var(--foreground));
+    margin: 20px auto;
+}
+
+.signInFormContainer {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));    
+    position: absolute;
+    top: 0;
+    height: 100%;
+    transition: all 0.6s ease-in-out;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.signInLoginContainer {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));    
+    left: 0;
+    width: 50%;
+    z-index: 2;
+}
+
+.signInForm {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0 50px;
+    height: 100%;
+    text-align: center;
+    width: 100%;
+}
+
+.signInContent {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    width: 100%;
+    gap: 12px;
+}
+
+.signInContent .signInTitle {
+    align-self: flex-start;
+}
+
+.signInContent .signInButton {
+    align-self: center;
+}
+
+.signInInput {
+    background-color: hsl(var(--muted));
+    color: hsl(var(--foreground));
+    border-radius: 10px;
+    border: none;
+    padding: 12px 15px;
+    margin: 8px 0;
+    width: 100%;
+    max-width: 300px;
+    font-weight: normal;
+}
+
+.signInButton {
+    border: 2.5px solid white;
+    color: white;
+    position: relative;
+    border-radius: 20px;
+    border: 2.5px solid #6d6e74;
+    background-color: transparent;
+    font-size: 18px;
+    margin: 10px;
+    padding: 12px 80px;
+    letter-spacing: 1px;
+    text-transform: capitalize;
+    transition: 0.3s ease-in-out;
+    width: 100%;
+    max-width: 300px; 
+    margin-top: 18px;
+}
+
+.signInButton:hover {
+    letter-spacing: 3px;
+}
+
+.signInText {
+    font-size: 15px;
+    font-weight: 400;
+    margin-top: 25px;
+    text-align: center;
+}
+
+.signInLink {
+    color: hsl(var(--foreground));
+    font-size: 14px;
+    text-decoration: none;
+    transition: 0.3s ease-in-out;
+}
+
+.signInLink:hover {
+    color: hsl(var(--foreground));
+    text-decoration: underline;
+}
+
+.signInCheckbox {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 300px;
+}
+
+.passLink {
+    color: hsl(var(--foreground));
+    font-size: 14px;
+    text-decoration: none;
+    transition: 0.3s ease-in-out;
+    margin-top: 12px;
+}
+
+.passLink:hover {
+    color: hsl(var(--foreground));
+    text-decoration: underline;
+}
+
+.signInOverlayContainer {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 50%;
+    height: 100%;
+    overflow: hidden;
+    transition: transform 0.6s ease-in-out;
+    z-index: 0;
+    color: white;
+}
+
+.signInOverlay {
+    background-image: url(https://res.cloudinary.com/dqi7xcwhj/image/upload/v1738020726/knt8lnlb1xta4txeglyp.gif);
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: 0 0;
+    color: #fff;
+    position: relative;
+    left: -100%;
+    height: 100%;
+    width: 200%;
+    z-index: -1;
+    transform: translateX(0);
+    transition: transform 0.6s ease-in-out;
+    
+}
+
+.signInOverlayPanel {
+    font-family: "Delius", sans-serif;
+    font-size: 50px;
+    line-height: 1.2;
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0 40px;
+    text-align: center;
+    top: 0;
+    height: 100%;
+    width: 50%;
+    transform: translateX(0);
+    transition: transform 0.6s ease-in-out;
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+    will-change: transform;
+}
+
+.signInOverlayLeft {
+    transform: translateX(-20%);
+}
+
+.signInOverlayRight {
+    right: 0;
+    transform: translateX(0);
+}
+
+.signInContainer.rightPanelActive .signInLoginContainer {
+    transform: translateX(100%);
+}
+
+.signInContainer.rightPanelActive .signInRegisterContainer {
+    transform: translateX(100%);
+    opacity: 1;
+    z-index: 5;
+    animation: show 0.6s;
+}
+
+@keyframes show {
+    0%,
+    49.99% {
+        opacity: 0;
+        z-index: 1;
+    }
+
+    50%,
+    100% {
+        opacity: 1;
+        z-index: 5;
+    }
+}
+
+.signInContainer.rightPanelActive .signInOverlayContainer {
+    transform: translate(-100%);
+}
+
+.signInContainer.rightPanelActive .signInOverlay {
+    transform: translateX(50%);
+}
+
+.signInContainer.rightPanelActive .signInOverlayLeft {
+    transform: translateX(0);
+}
+
+.signInContainer.rightPanelActive .signInOverlayRight {
+    transform: translateX(20%);
+}
+
+/* Responsive Design Mejorado */
+@media screen and (max-width: 768px) {
+    .signInContainer {
+        min-height: 100vh;
+        margin: 0;
+        border-radius: 0;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .signInLoginContainer {
+        width: 100%;
+        position: relative;
+        transform: translateX(0);
+    }
+
+    .signInOverlayContainer {
+        display: none;
+    }
+
+    .signInTitle {
+        font-size: 1.75rem;
+        margin-top: 2rem;
+    }
+
+    .signInForm {
+        padding: 1rem;
+        justify-content: flex-start;
+        height: 100vh;
+    }
+
+    .signInContent {
+        margin-top: 2rem;
+    }
+
+    .signInButton {
+        padding: 12px 40px;
+        font-size: 16px;
+        width: 100%;
+        max-width: none;
+        margin: 1rem 0;
+    }
+
+    .signInInput {
+        max-width: none;
+        width: 100%;
+        font-size: 16px;
+        padding: 15px;
+    }
+
+    .signInCheckbox {
+        max-width: none;
+        width: 100%;
+    }
+
+    .signInText {
+        margin: 1.5rem 0;
+    }
+
+    .passLink {
+        margin-top: 1rem;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .signInContainer {
+        box-shadow: none;
+    }
+
+    .signInTitle {
+        font-size: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .signInForm {
+        padding: 1rem;
+    }
+
+    .signInText {
+        font-size: 14px;
+        margin: 1rem 0;
+    }
+
+    .signInButton {
+        padding: 12px 20px;
+        font-size: 14px;
+        letter-spacing: 0.5px;
+    }
+
+    .signInButton:hover {
+        letter-spacing: 1px;
+    }
+
+    .signInInput {
+        padding: 12px;
+        margin: 6px 0;
+    }
+
+    .passLink {
+        font-size: 13px;
+    }
+}
+
+@media screen and (max-height: 480px) and (orientation: landscape) {
+    .signInContainer {
+        min-height: 100vh;
+    }
+
+    .signInForm {
+        padding: 0.5rem;
+        justify-content: center;
+    }
+
+    .signInTitle {
+        font-size: 1.25rem;
+        margin: 0.5rem 0;
+    }
+
+    .signInContent {
+        margin-top: 0.5rem;
+        gap: 8px;
+    }
+
+    .signInInput {
+        padding: 8px;
+        margin: 4px 0;
+    }
+
+    .signInButton {
+        padding: 8px 20px;
+        margin: 0.5rem 0;
+    }
+
+    .signInText, .passLink {
+        margin: 0.5rem 0;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .signInInput[type="email"],
+    .signInInput[type="password"] {
+        font-size: 16px;
+    }
+}

@@ -1,0 +1,99 @@
+services:
+  gateway:
+    build:
+      context: .
+      target: development
+    restart: always
+    hostname: gateway
+    env_file:
+      - .env.local
+    ports:
+      - "8000:8000" 
+    volumes:
+      # Monta el código fuente para hot reload
+      - ./apps:/app/apps
+      - ./package.json:/app/package.json
+      - ./package-lock.json:/app/package-lock.json
+      - ./nest-cli.json:/app/nest-cli.json
+      - ./tsconfig.json:/app/tsconfig.json
+      - ./tsconfig.build.json:/app/tsconfig.build.json
+      # Evita montar node_modules
+      - /app/node_modules
+    networks:
+      - backend
+    command: npm run start:dev:gateway
+    environment:
+      - NODE_ENV=development
+
+  auth-service:
+    build:
+      context: .
+      target: development
+    restart: always
+    hostname: auth-service
+    env_file:
+      - .env.local
+    volumes:
+      - ./apps:/app/apps
+      - ./package.json:/app/package.json
+      - ./package-lock.json:/app/package-lock.json
+      - ./nest-cli.json:/app/nest-cli.json
+      - ./tsconfig.json:/app/tsconfig.json
+      - ./tsconfig.build.json:/app/tsconfig.build.json
+      - /app/node_modules
+    networks:
+      - backend
+    command: npm run start:auth:dev
+    environment:
+      - NODE_ENV=development
+
+  user-service:
+    build:
+      context: .
+      target: development
+    restart: always
+    hostname: user-service
+    env_file:
+      - .env.local
+    volumes:
+      - ./apps:/app/apps
+      - ./package.json:/app/package.json
+      - ./package-lock.json:/app/package-lock.json
+      - ./nest-cli.json:/app/nest-cli.json
+      - ./tsconfig.json:/app/tsconfig.json
+      - ./tsconfig.build.json:/app/tsconfig.build.json
+      - /app/node_modules
+    networks:
+      - backend
+    command: npm run start:user:dev
+    environment:
+      - NODE_ENV=development
+
+  payment-service:
+    build:
+      context: .
+      target: development
+    restart: always
+    hostname: payment-service
+    env_file:
+      - .env.local
+    volumes:
+      - ./apps:/app/apps
+      - ./package.json:/app/package.json
+      - ./package-lock.json:/app/package-lock.json
+      - ./nest-cli.json:/app/nest-cli.json
+      - ./tsconfig.json:/app/tsconfig.json
+      - ./tsconfig.build.json:/app/tsconfig.build.json
+      - /app/node_modules
+    networks:
+      - backend
+    command: npm run start:payment:dev
+    environment:
+      - NODE_ENV=development
+
+networks:
+  backend:
+    driver: bridge
+
+volumes:
+  app_data:

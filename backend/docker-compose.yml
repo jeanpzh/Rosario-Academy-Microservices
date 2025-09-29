@@ -1,0 +1,54 @@
+
+services:
+  gateway:
+    build:
+      context: .
+      target: gateway
+    restart: always
+    hostname: gateway
+    env_file:
+      - .env.local
+    ports:
+      - "8000:8000" 
+    networks:
+      - backend
+
+  auth-service:
+    build:
+      context: .
+      target: auth-service
+    restart: always
+    hostname: auth-service
+    env_file:
+      - .env.local
+    networks:
+      - backend
+
+  user-service:
+    build:
+      context: .
+      target: user-service
+    restart: always
+    hostname: user-service
+    env_file:
+      - .env.local
+    networks:
+      - backend
+
+  payment-service:
+    build:
+      context: .
+      target: payment-service
+    restart: always
+    hostname: payment-service
+    env_file:
+      - .env.local
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge
+
+volumes:
+  app_data:

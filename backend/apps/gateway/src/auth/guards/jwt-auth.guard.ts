@@ -6,28 +6,20 @@ import {
   Logger
 } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
-import { JwtService } from '@nestjs/jwt'
 import { Request } from 'express'
 import { IS_PUBLIC_KEY } from '@common/decorators'
-
-interface JwtPayload {
-  sub: string
-  email: string
-  role: string
-  iat: number
-  exp: number
-}
+import { GatewaySessionService } from '../gateway.session.service'
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
-  private readonly logger = new Logger(JwtAuthGuard.name)
-
   constructor(
-    private jwtService: JwtService,
-    private reflector: Reflector
+    private reflector: Reflector,
+    private logger: Logger,
+    private sessionService: GatewaySessionService
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    this.logger.log('JwtAuthGuard: Checking authentication for protected route')
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
       context.getClass()
@@ -39,18 +31,22 @@ export class JwtAuthGuard implements CanActivate {
     const request = context.switchToHttp().getRequest<Request>()
     try {
       const token = this.extractTokenFromRequest(request)
+      this.logger.log(`Extracted token: ${token}`)
 
       if (!token) {
         this.logger.warn('No token provided in request')
         throw new UnauthorizedException('No token provided')
       }
 
-      const payload: JwtPayload = await this.jwtService.verifyAsync(token, {
-        secret: process.env.JWT_SECRET
-      })
+      const session = await this.sessionService.validateToken(token)
 
-      request['user'] = payload
+      if (!session) {
+        this.logger.warn('Invalid or expired token')
+        throw new UnauthorizedException('Invalid or expired token')
+      }
 
+      request['user'] = session
+      this.logger.log('user' + JSON.stringify(request.user))
       return true
     } catch (error) {
       this.logger.error('JWT verification failed:', error.message)
@@ -64,7 +60,10 @@ export class JwtAuthGuard implements CanActivate {
   }
 
   private extractTokenFromRequest(request: Request): string | undefined {
-    const cookieToken = request.cookies?.auth_session
+    const cookieToken =
+      request.cookies?.auth_session ||
+      request.headers['authorization']?.slice(7)
+
     if (!cookieToken) {
       this.logger.warn('No auth_session cookie found')
       return undefined

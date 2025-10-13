@@ -2,15 +2,12 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Card, CardContent } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
-import { useFetchProfileQuery } from '@/hooks/use-fetch-profile'
-import { useAdmin } from '../admin/provider'
+import { useFetchFullProfile } from '@/components/layout/dashboard/hooks/use-fetch-full-profile'
+import { useUser } from '@/contexts/user-context'
 
 export default function Profile() {
-  const { user } = useAdmin()
-  console.log('User:', user)
-
-  const profile = user.user_metadata
+  const { userId } = useUser()
+  const { data: user } = useFetchFullProfile({ userId: userId })
 
   if (!user) {
     return (
@@ -29,22 +26,22 @@ export default function Profile() {
       <CardContent className='flex h-auto flex-col items-center space-y-4 pt-6'>
         <Avatar className='size-20'>
           <AvatarImage
-            src={user.avatar_url || '/avatar-placeholder.png'}
+            src={user.avatarUrl || '/avatar-placeholder.png'}
             alt='Avatar del administrador'
           />
           <AvatarFallback>
-            {profile.first_name?.charAt(0)}
-            {profile.last_name?.charAt(0)}
+            {user.firstName?.charAt(0)}
+            {user.paternalLastName?.charAt(0)}
           </AvatarFallback>
         </Avatar>
         <div className='text-center'>
           <h3 className='text-xl font-semibold'>
-            {profile.first_name} {profile.last_name}
+            {user.firstName} {user.paternalLastName}
           </h3>
-          <p className='text-sm text-muted-foreground'>{profile.email}</p>
+          <p className='text-sm text-muted-foreground'>{user.email}</p>
           <p className='text-lg font-medium text-primary'>
             Rol:{' '}
-            {profile.role === 'admin'
+            {user.role === 'admin'
               ? 'Administrador'
               : 'Auxiliar Administrativo'}
           </p>
@@ -52,16 +49,16 @@ export default function Profile() {
         <div className='w-full space-y-2 text-base text-muted-foreground'>
           <p>
             Fecha de Nacimiento:{' '}
-            {profile.birth_date
-              ? new Date(profile.birth_date).toLocaleDateString('es-ES', {
+            {user.birthDate
+              ? new Date(user.birthDate).toLocaleDateString('es-ES', {
                   year: 'numeric',
                   month: 'long',
                   day: 'numeric'
                 })
               : 'No especificada'}
           </p>
-          <p>DNI: {profile.dni || 'No especificado'}</p>
-          <p>Teléfono: {profile.phone || 'No especificado'}</p>
+          <p>DNI: {user.dni || 'No especificado'}</p>
+          <p>Teléfono: {user.phone || 'No especificado'}</p>
         </div>
       </CardContent>
     </Card>

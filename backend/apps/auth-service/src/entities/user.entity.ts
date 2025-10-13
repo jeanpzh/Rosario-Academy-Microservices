@@ -16,7 +16,8 @@ export interface User {
     provider?: string
     providers?: string[]
     [key: string]: any
-  }
+  },
+  last_password_change?: string | null
 }
 
 export interface AuthTokens {

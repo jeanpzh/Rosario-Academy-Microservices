@@ -5,8 +5,11 @@
   "compilerOptions": {
     "deleteOutDir": true,
     "webpack": true,
-    "tsConfigPath": "apps/gateway/tsconfig.app.json"
+    "tsConfigPath": "apps/gateway/tsconfig.app.json",
+    "assets": ["**/*.proto"],
+    "watchAssets": true
   },
+
   "monorepo": true,
   "root": "apps/gateway",
   "projects": {
@@ -46,6 +49,5 @@
         "tsConfigPath": "apps/payment-service/tsconfig.app.json"
       }
     }
-   
   }
 }

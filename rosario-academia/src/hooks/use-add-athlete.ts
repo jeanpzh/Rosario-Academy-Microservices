@@ -1,19 +1,26 @@
 import { AthleteFormData } from '@/app/dashboard/schemas/athlete-schema'
-import { AUTH_URL } from '@/lib/config'
+import { API_BASE_URL } from '@/lib/config'
 import { useAthleteModalStore } from '@/lib/stores/useAthleteStore'
 import { useModalStore } from '@/lib/stores/useModalStore'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 
-export const addAthlete = async (data: AthleteFormData) => {
+export const addAthlete = async (data: AthleteFormData, file?: Blob | null) => {
   const formData = new FormData()
   Object.entries(data).forEach(([key, value]) => {
-    formData.append(key, value as string)
+    if (value !== null && value !== undefined) {
+      formData.append(key, value as string)
+    }
   })
 
-  const response = await fetch(`${AUTH_URL}/athlete`, {
+  if (file) {
+    formData.append('file', file)
+  }
+
+  const response = await fetch(`${API_BASE_URL}/users/athlete`, {
     method: 'POST',
-    body: formData
+    body: formData,
+    credentials: 'include'
   })
 
   const result = await response.json()
@@ -25,7 +32,7 @@ export const addAthlete = async (data: AthleteFormData) => {
 
 export const useAddAthleteMutation = () => {
   const { closeModal, setOpenModal } = useModalStore()
-  const { setCurrentItem } = useAthleteModalStore()
+  const setCurrentItem = useAthleteModalStore((state) => state.setCurrentItem)
 
   const queryClient = useQueryClient()
   return useMutation({
@@ -34,7 +41,7 @@ export const useAddAthleteMutation = () => {
       data: AthleteFormData
       file: Blob | null
     }) => {
-      return addAthlete(variables.data)
+      return addAthlete(variables.data, variables.file)
     },
     onSuccess: (user) => {
       queryClient.invalidateQueries({ queryKey: ['athletes'] })

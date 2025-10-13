@@ -11,12 +11,12 @@ export function extractAuthToken(request: NextRequest): string | null {
   }
 
   const supabaseToken = request.cookies.get(
-    'sb-cfspxuhuawyoxbobbpme-auth-token'
+    'sb-cfspxuhuawyoxbobbpme-auth-token-code-verifier'
   )?.value
   if (supabaseToken) {
+    console.log({supabaseToken})
     return supabaseToken
   }
-
   const authHeader = request.headers.get('authorization')
   if (authHeader && authHeader.startsWith('Bearer ')) {
     return authHeader.substring(7)

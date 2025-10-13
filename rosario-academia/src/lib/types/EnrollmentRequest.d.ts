@@ -4,4 +4,6 @@ interface EnrollmentRequest {
   status: "pending" | "approved" | "rejected";
   requested_schedule: Schedule;
   assigned_schedule: Schedule;
+  planId: string;
+  scheduleId: number;
 }

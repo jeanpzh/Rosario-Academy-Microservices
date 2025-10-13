@@ -1,4 +1,8 @@
-import { AUTH_URL, PAYMENT_URL, USER_URL } from '@/lib/config'
+import { API_BASE_URL } from '@/lib/config'
+
+const AUTH_URL = `${API_BASE_URL}/auth`
+const USER_URL = `${API_BASE_URL}/users`
+const PAYMENT_URL = `${API_BASE_URL}/payment`
 
 export interface UserMetaData {
   role: 'athlete' | 'auxiliar_administrativo' | 'admin'
@@ -22,10 +26,18 @@ export interface AuthUser {
   user_metadata: UserMetaData
 }
 
-export async function getProfile(token: string) {
+export async function getProfile() {
+  const token = (await cookies()).get('auth_session')?.value
+  if (!token) {
+    console.error('No auth token found')
+    return null
+  }
   try {
-    const response = await fetch(`${AUTH_URL}/profile`, {
-      headers: { Cookie: `auth_session=${token}` }
+    const response = await fetch(`${USER_URL}/me`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
     })
     if (!response.ok) {
       throw new Error('Error al obtener el perfil')
@@ -154,7 +166,7 @@ export async function getPreferenceInitPoint(
     const response = await fetch(`${PAYMENT_URL}/payment/create-subscription`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ athleteId, scheduleId , email}),
+      body: JSON.stringify({ athleteId, scheduleId, email }),
       credentials: 'include'
     })
 

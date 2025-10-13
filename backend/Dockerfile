@@ -33,6 +33,9 @@ COPY tsconfig*.json ./
 # Instalar TODAS las dependencias (incluye devDependencies)
 RUN npm ci
 
+# Copiar la estructura de apps con sus archivos de configuración
+COPY apps/ ./apps/
+
 # Exponer puerto por defecto
 EXPOSE 8000
 
@@ -56,6 +59,8 @@ COPY package*.json ./
 RUN npm ci --only=production
 COPY --from=base /app/dist ./dist
 COPY --from=base /app/node_modules ./node_modules
+# Copiar archivos .proto para gRPC
+COPY --from=base /app/apps/common/proto ./apps/common/proto
 CMD ["node", "dist/apps/auth-service/main.js"]
 
 # User Service
@@ -65,6 +70,8 @@ COPY package*.json ./
 RUN npm ci --only=production
 COPY --from=base /app/dist ./dist
 COPY --from=base /app/node_modules ./node_modules
+# Copiar archivos .proto para gRPC
+COPY --from=base /app/apps/common/proto ./apps/common/proto
 CMD ["node", "dist/apps/user-service/main.js"]
 
 # Payment Service

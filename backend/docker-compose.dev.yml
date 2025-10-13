@@ -2,94 +2,172 @@ services:
   gateway:
     build:
       context: .
+      dockerfile: Dockerfile
       target: development
     restart: always
     hostname: gateway
     env_file:
       - .env.local
     ports:
-      - "8000:8000" 
-    volumes:
-      # Monta el código fuente para hot reload
-      - ./apps:/app/apps
-      - ./package.json:/app/package.json
-      - ./package-lock.json:/app/package-lock.json
-      - ./nest-cli.json:/app/nest-cli.json
-      - ./tsconfig.json:/app/tsconfig.json
-      - ./tsconfig.build.json:/app/tsconfig.build.json
-      # Evita montar node_modules
-      - /app/node_modules
+      - "8000:8000"
     networks:
       - backend
-    command: npm run start:dev:gateway
-    environment:
-      - NODE_ENV=development
+    depends_on:
+      - redis
+    command: ["npm", "run", "start:dev:gateway"]
+    develop:
+      watch:
+        - action: sync
+          path: ./apps/gateway/src
+          target: /app/apps/gateway/src
+          ignore:
+            - node_modules/
+            - dist/
+        - action: rebuild
+          path: ./package.json
 
   auth-service:
     build:
       context: .
+      dockerfile: Dockerfile
       target: development
     restart: always
     hostname: auth-service
     env_file:
       - .env.local
-    volumes:
-      - ./apps:/app/apps
-      - ./package.json:/app/package.json
-      - ./package-lock.json:/app/package-lock.json
-      - ./nest-cli.json:/app/nest-cli.json
-      - ./tsconfig.json:/app/tsconfig.json
-      - ./tsconfig.build.json:/app/tsconfig.build.json
-      - /app/node_modules
     networks:
       - backend
-    command: npm run start:auth:dev
-    environment:
-      - NODE_ENV=development
+    command: ["npm", "run", "start:auth:dev"]
+    develop:
+      watch:
+        - action: sync
+          path: ./apps/auth-service/src
+          target: /app/apps/auth-service/src
+          ignore:
+            - node_modules/
+            - dist/
 
   user-service:
     build:
       context: .
+      dockerfile: Dockerfile
       target: development
     restart: always
     hostname: user-service
     env_file:
       - .env.local
-    volumes:
-      - ./apps:/app/apps
-      - ./package.json:/app/package.json
-      - ./package-lock.json:/app/package-lock.json
-      - ./nest-cli.json:/app/nest-cli.json
-      - ./tsconfig.json:/app/tsconfig.json
-      - ./tsconfig.build.json:/app/tsconfig.build.json
-      - /app/node_modules
     networks:
       - backend
-    command: npm run start:user:dev
-    environment:
-      - NODE_ENV=development
+    depends_on:
+      - kafka
+    command: ["npm", "run", "start:user:dev"]
+    develop:
+      watch:
+        - action: sync
+          path: ./apps/user-service/src
+          target: /app/apps/user-service/src
+          ignore:
+            - node_modules/
+            - dist/
 
   payment-service:
     build:
       context: .
+      dockerfile: Dockerfile
       target: development
     restart: always
     hostname: payment-service
     env_file:
       - .env.local
-    volumes:
-      - ./apps:/app/apps
-      - ./package.json:/app/package.json
-      - ./package-lock.json:/app/package-lock.json
-      - ./nest-cli.json:/app/nest-cli.json
-      - ./tsconfig.json:/app/tsconfig.json
-      - ./tsconfig.build.json:/app/tsconfig.build.json
-      - /app/node_modules
     networks:
       - backend
-    command: npm run start:payment:dev
+    depends_on:
+      - redis
+      - kafka
+    command: ["npm", "run", "start:payment:dev"]
+    develop:
+      watch:
+        - action: sync
+          path: ./apps/payment-service/src
+          target: /app/apps/payment-service/src
+          ignore:
+            - node_modules/
+            - dist/
+
+  redis:
+    image: redis:7.2-alpine
+    restart: always
+    hostname: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - backend
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    hostname: zookeeper
+    container_name: zookeeper-dev
+    restart: always
+    ports:
+      - "2181:2181"
     environment:
-      - NODE_ENV=development
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - backend
+    volumes:
+      - zookeeper_data:/var/lib/zookeeper/data
+      - zookeeper_logs:/var/lib/zookeeper/log
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    hostname: kafka
+    container_name: kafka-dev
+    restart: always
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+      - "9093:9093"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+    networks:
+      - backend
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-broker-api-versions --bootstrap-server localhost:9092 || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui-dev
+    restart: always
+    depends_on:
+      kafka:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local-dev
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+      DYNAMIC_CONFIG_ENABLED: 'true'
+    networks:
+      - backend
 
 networks:
   backend:
@@ -97,3 +175,7 @@ networks:
 
 volumes:
   app_data:
+  redis_data:
+  zookeeper_data:
+  zookeeper_logs:
+  kafka_data:

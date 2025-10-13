@@ -505,21 +505,7 @@ export async function createPaymentRecord(
 
   return { payment, subscription }
 }
-export async function getAthleteById(athleteId: string): Promise<Athlete> {
-  const supabase = await createClient()
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', athleteId)
-    .single()
 
-  if (error) throw error
-  return data
-}
-/* 
-
-
-*/
 export async function getAthletesWithPayments(): Promise<any[] | null> {
   const supabase = await createClient()
 

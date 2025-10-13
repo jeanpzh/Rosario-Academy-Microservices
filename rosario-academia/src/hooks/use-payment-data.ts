@@ -22,7 +22,6 @@ export function usePaymentData(athleteId?: string) {
       }
 
       const result = await response.json()
-      console.log('Payment data fetched:', result)
       if (!result.success) {
         throw new Error(result.error || 'Unknown error occurred')
       }

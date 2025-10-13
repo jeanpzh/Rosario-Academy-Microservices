@@ -10,51 +10,33 @@ import { EditProfileForm } from '@/app/dashboard/athlete/profile/components/Edit
 import { PersonalCard } from '@/app/dashboard/athlete/profile/components/PersonalCard'
 import { useAthleteStore } from '@/lib/stores/useUserStore'
 import { toast } from 'sonner'
-import { useUpdateProfileData } from '@/hooks/use-profile'
+
+import { useUser } from '@/contexts/user-context'
+import { useFetchFullProfile } from '@/components/layout/dashboard/hooks/use-fetch-full-profile'
+import { useFetchAthleteData } from '@/hooks/use-fetch-athlete-data'
+import { useUpdateProfile } from './hooks/use-update-profile'
+import LoadingPage from '@/components/LoadingPage'
 
 export default function ProfilePage() {
-  const userDetails = useAthleteStore((state) => state.athleteDetails)
-  const setAthleteData = useAthleteStore((state) => state.setAthleteData)
-  const { updateProfile } = useUpdateProfileData(userDetails?.profile.id)
-  const userProfile = userDetails?.profile ?? null
+  const { userId } = useUser()
+  const { data: userProfile, isLoading } = useFetchFullProfile({ userId })
+  const { data: athleteData } = useFetchAthleteData({ userId })
+  const { mutateAsync: updateProfile } = useUpdateProfile()
   const [isEditing, setIsEditing] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
-  const [daysRemaining, setDaysRemaining] = useState(30)
-  console.log('User Profile:', { userDetails })
-  if (!userProfile) return <div>No profile data available</div>
+
+  if (isLoading) return <LoadingPage />
+  if (!userProfile) return <div>No se encontró el perfil del usuario.</div>
 
   const handleEditSubmit = async (data: TEditForm) => {
     try {
       setIsSaving(true)
-      toast.promise(
-        updateProfile({
-          first_name: data.firstName,
-          paternal_last_name: data.paternalLastName,
-          maternal_last_name: data.maternalLastName,
-          phone: data.phone
-        }),
-        {
-          loading: 'Guardando cambios...',
-          success: (res) => {
-            setAthleteData({
-              ...userDetails,
-              profile: {
-                ...userDetails?.profile,
-                first_name: data.firstName,
-                paternal_last_name: data.paternalLastName,
-                maternal_last_name: data.maternalLastName,
-                phone: data.phone
-              }
-            })
-
-            setDaysRemaining(30)
-            return res.message
-          },
-          error: (err) => {
-            return err.message || 'Error al actualizar el perfil'
-          }
-        }
-      )
+      toast.promise(updateProfile({ data: data, id: userId }), {
+        loading: 'Guardando cambios...',
+        success: () => 'Perfil actualizado con éxito',
+        error: (err) => err.message || 'Error al actualizar el perfil'
+      })
+      setIsEditing(false)
     } catch (e: any) {
       toast.error('Error', {
         description: e.message || 'Error al actualizar el perfil',
@@ -62,14 +44,13 @@ export default function ProfilePage() {
       })
     } finally {
       setIsSaving(false)
-      setIsEditing(false)
     }
   }
 
   const defaultFormValues: TEditForm = {
-    firstName: userProfile?.first_name || '',
-    paternalLastName: userProfile?.paternal_last_name || '',
-    maternalLastName: userProfile?.maternal_last_name || '',
+    firstName: userProfile?.firstName || '',
+    paternalLastName: userProfile?.paternalLastName || '',
+    maternalLastName: userProfile?.maternalLastName || '',
     phone: userProfile?.phone || ''
   }
 
@@ -94,8 +75,8 @@ export default function ProfilePage() {
 
           <div className='grid h-full gap-8 md:grid-cols-3'>
             <PersonalCard
-              userProfile={userDetails?.profile}
-              athlete={userDetails as AthleteState}
+              userProfile={userProfile}
+              athlete={athleteData}
               isEditing={isEditing}
             />
 
@@ -117,8 +98,7 @@ export default function ProfilePage() {
                   isEditing={isEditing}
                   isSaving={isSaving}
                   onCancelEdit={() => setIsEditing(false)}
-                  user={userDetails}
-                  userProfile={userProfile}
+                  user={userProfile}
                 />
               </Card>
             </motion.div>

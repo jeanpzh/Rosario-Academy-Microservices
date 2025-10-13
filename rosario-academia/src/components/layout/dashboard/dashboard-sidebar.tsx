@@ -6,12 +6,14 @@ import { IconArrowLeft } from '@tabler/icons-react'
 import { cn } from '@/lib/utils'
 import { Logo } from '@/components/ui/logo'
 import Image from 'next/image'
-import { signOutAction } from '@/app/(auth-pages)/actions'
 import { Button } from '@/components/ui/button'
 import { ThemeSwitcher } from '@/components/theme-switcher'
 import { DEFAULT_IMAGE } from '@/utils/utils'
 import { useRouter } from 'next/navigation'
-import { AUTH_URL } from '@/lib/config'
+import { API_BASE_URL } from '@/lib/config'
+import { useUser } from '@/hooks/use-user'
+import { Skeleton } from '@/components/ui/skeleton'
+import { useFetchFullProfile } from './hooks/use-fetch-full-profile'
 
 interface Links {
   label: string
@@ -21,17 +23,18 @@ interface Links {
 
 export function DashboardSidebar({
   links,
-  user
+  userId
 }: {
   links: Links[]
-  user: any
+  userId: string
 }) {
+  const { data: user, isLoading, error } = useFetchFullProfile({ userId })
   const { push } = useRouter()
-  const { user_metadata } = user || {}
   const [open, setOpen] = useState(false)
+
   const handleSignOut = async (e: React.FormEvent) => {
     e.preventDefault()
-    const res = await fetch(`${AUTH_URL}/signout`, {
+    const res = await fetch(`${API_BASE_URL}/auth/signout`, {
       credentials: 'include',
       method: 'POST'
     })
@@ -41,6 +44,10 @@ export function DashboardSidebar({
       console.error('Error signing out:', res.statusText)
       throw new Error('Error signing out')
     }
+  }
+
+  if (error) {
+    return <div>Error loading user data</div>
   }
   return (
     <div
@@ -78,22 +85,29 @@ export function DashboardSidebar({
             </div>
           </div>
           <div>
-            {user_metadata && (
-              <SidebarLink
-                link={{
-                  label: `${user_metadata.first_name || ''} ${user_metadata.paternal_last_name || ''}  `,
-                  href: '#',
-                  icon: (
-                    <Image
-                      src={DEFAULT_IMAGE}
-                      className='size-8 shrink-0 rounded-full object-cover'
-                      width={50}
-                      height={50}
-                      alt='Avatar'
-                    />
-                  )
-                }}
-              />
+            {isLoading ? (
+              <div className='flex items-center gap-2 p-2'>
+                <Skeleton className='size-8 rounded-full' />
+                <Skeleton className='h-4 w-32' />
+              </div>
+            ) : (
+              user && (
+                <SidebarLink
+                  link={{
+                    label: `${user.firstName || ''} ${user.paternalLastName || ''}  `,
+                    href: '#',
+                    icon: (
+                      <Image
+                        src={DEFAULT_IMAGE}
+                        className='size-8 shrink-0 rounded-full object-cover'
+                        width={50}
+                        height={50}
+                        alt='Avatar'
+                      />
+                    )
+                  }}
+                />
+              )
             )}
           </div>
         </SidebarBody>

@@ -18,9 +18,7 @@ import {
   DialogTitle,
   DialogTrigger
 } from '@/components/ui/dialog'
-import CardSkeleton from '@/app/dashboard/components/CardSkeleton'
-import { useAthleteStore } from '@/lib/stores/useUserStore'
-import { useFetchLastProfileUpdateQuery } from '@/hooks/use-fetch-last-profile-update'
+import { getDaysRemaining } from '@/utils/formats'
 
 interface EditProfileFormProps {
   defaultValues: TEditForm
@@ -28,8 +26,7 @@ interface EditProfileFormProps {
   isEditing: boolean
   isSaving: boolean
   onCancelEdit: () => void
-  user: any
-  userProfile: any
+  user: User
 }
 
 export function EditProfileForm({
@@ -38,20 +35,13 @@ export function EditProfileForm({
   isEditing,
   isSaving,
   onCancelEdit,
-  user,
-  userProfile
+  user
 }: EditProfileFormProps) {
   const { control, handleSubmit, reset, watch } = useForm<TEditForm>({
     resolver: zodResolver(editFormSchema),
     defaultValues
   })
-  const { setDaysRemaining } = useAthleteStore()
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = React.useState(false)
-
-  const { error: lastProfileUpdateError, isLoading: lastProfileUpdateLoading } =
-    useFetchLastProfileUpdateQuery({ setDaysRemaining, id: userProfile.id })
-
-  const daysRemaining = userProfile.daysRemaining
 
   const handleCancel = () => {
     reset(defaultValues)
@@ -63,15 +53,12 @@ export function EditProfileForm({
   const hasChanges =
     JSON.stringify(watchedValues) !==
     JSON.stringify({
-      firstName: userProfile?.first_name || '',
-      paternalLastName: userProfile?.paternal_last_name || '',
-      maternalLastName: userProfile?.maternal_last_name || '',
-      phone: userProfile?.phone || ''
+      firstName: user?.firstName,
+      paternalLastName: user?.paternalLastName,
+      maternalLastName: user?.maternalLastName,
+      phone: user?.phone
     })
-
-  if (lastProfileUpdateLoading) return <CardSkeleton />
-  if (lastProfileUpdateError) return null
-
+  const daysRemaining = getDaysRemaining(user.lastAvatarChange)
   return (
     <>
       <form className='flex flex-col gap-4 p-8'>

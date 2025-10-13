@@ -26,7 +26,6 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { toast } from "sonner";
-import { PaymentMethod } from "@/lib/types/PaymentMethod";
 
 const formSchema = z.object({
   amount: z.coerce.number().positive("El monto debe ser mayor a 0"),
@@ -38,7 +37,7 @@ const formSchema = z.object({
 });
 
 interface PaymentFormProps {
-  paymentMethods: PaymentMethod[] | undefined;
+  paymentMethods: PaymentMethods[] | undefined;
   onSubmit: (data: Payment) => Promise<void>;
   isPending: boolean;
 }
@@ -58,7 +57,8 @@ export function PaymentForm({ paymentMethods, onSubmit, isPending }: PaymentForm
 
   const handleSubmit = async (data: Payment) => {
     try {
-      await onSubmit(data);
+      console.log(data)
+      await onSubmit(data)
     } catch (error) {
       toast.error("Error al procesar el pago. Por favor, inténtelo de nuevo.");
     }

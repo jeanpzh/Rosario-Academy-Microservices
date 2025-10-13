@@ -1,55 +1,59 @@
-import TextField from "@/app/(auth-pages)/components/TextField";
-import React, { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import TextField from '@/app/(auth-pages)/components/TextField'
+import React, { useEffect } from 'react'
+import { useForm } from 'react-hook-form'
 import {
   AssistantFormData,
-  assistantFormSchema,
-} from "@/app/dashboard/admin/schemas/assistant-schema";
-import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
-import { useAddAssistantQuery } from "@/hooks/use-add-assistant";
-import { useUpdateAssistant } from "@/hooks/use-update-assistant";
-import { useAssistantStore } from "@/lib/stores/useAssistantStore";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { DialogTitle } from "@/components/ui/dialog";
-export default function AssistantForm({ mode }: { mode: "create" | "edit" | undefined }) {
+  assistantFormSchema
+} from '@/app/dashboard/admin/schemas/assistant-schema'
+import { Button } from '@/components/ui/button'
+import { toast } from 'sonner'
+import { useAddAssistantQuery } from '@/hooks/use-add-assistant'
+import { useUpdateAssistant } from '@/hooks/use-update-assistant'
+import { useAssistantStore } from '@/lib/stores/useAssistantStore'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { DialogTitle } from '@/components/ui/dialog'
+export default function AssistantForm({
+  mode
+}: {
+  mode: 'create' | 'edit' | undefined
+}) {
   const { control, reset, handleSubmit } = useForm<AssistantFormData>({
-    resolver: zodResolver(assistantFormSchema),
-  });
-  const { currentItem: currentAssistant } = useAssistantStore();
+    resolver: zodResolver(assistantFormSchema)
+  })
+  const { currentItem: currentAssistant } = useAssistantStore()
 
   // For Assistant Sign Up from Table
-  const postMutation = useAddAssistantQuery();
+  const postMutation = useAddAssistantQuery()
   // For PUT request, update Assistant
-  const updateMutation = useUpdateAssistant();
+  const updateMutation = useUpdateAssistant()
 
   const onSubmit = async (data: AssistantFormData) => {
     try {
-      if (mode === "create") postMutation.mutate(data);
-      else if (mode === "edit") updateMutation.mutate(data);
+      if (mode === 'create') postMutation.mutate(data)
+      else if (mode === 'edit') updateMutation.mutate(data)
     } catch (error) {
-      toast.error("Error", {
-        description: "Hubo un problema al guardar los datos. Por favor, intenta de nuevo.",
-        duration: 5000,
-      });
+      toast.error('Error', {
+        description:
+          'Hubo un problema al guardar los datos. Por favor, intenta de nuevo.',
+        duration: 5000
+      })
     }
-  };
+  }
 
-  // Render fields based on mode -> "create" | "edit"
   useEffect(() => {
-    if (mode === "create") {
+    if (mode === 'create') {
       reset({
-        first_name: "",
-        paternal_last_name: "",
-        maternal_last_name: "",
-        birth_date: "",
-        dni: "",
-        phone: "",
-        email: "",
-      });
-    } else if (mode === "edit" && currentAssistant) {
-      // if mode is edit, set the fields with the current item data
-      const assistant = currentAssistant as AssistantFormData;
+        first_name: '',
+        paternal_last_name: '',
+        maternal_last_name: '',
+        birth_date: '',
+        dni: '',
+        phone: '',
+        email: ''
+      })
+    } else if (mode === 'edit' && currentAssistant) {
+      const assistant = currentAssistant as AssistantFormData
+      console.log(assistant)
       reset({
         first_name: assistant.first_name,
         paternal_last_name: assistant.paternal_last_name,
@@ -57,66 +61,77 @@ export default function AssistantForm({ mode }: { mode: "create" | "edit" | unde
         birth_date: assistant.birth_date,
         dni: assistant.dni,
         phone: assistant.phone,
-        email: assistant.email,
-      });
+        email: assistant.email
+      })
     }
-  }, [mode, reset, currentAssistant]);
+  }, [mode, reset, currentAssistant])
   return (
     <>
       <DialogTitle>
-        {mode === "create" ? "Nuevo Auxiliar Administrativo" : "Editar Auxiliar"}
+        {mode === 'create'
+          ? 'Nuevo Auxiliar Administrativo'
+          : 'Editar Auxiliar'}
       </DialogTitle>
-      <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-2 gap-4">
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className='grid grid-cols-2 gap-4'
+      >
         <TextField
-          label="Nombre"
-          placeholder="Nombre"
+          label='Nombre'
+          placeholder='Nombre'
           control={control}
-          name="first_name"
-          htmlFor="first_name"
+          name='first_name'
+          htmlFor='first_name'
         />
         <TextField
-          label="Apellido Paterno"
-          placeholder="Apellido Paterno"
+          label='Apellido Paterno'
+          placeholder='Apellido Paterno'
           control={control}
-          name="paternal_last_name"
-          htmlFor="paternal_last_name"
+          name='paternal_last_name'
+          htmlFor='paternal_last_name'
         />
         <TextField
-          label="Apellido Materno"
-          placeholder="Apellido Materno"
+          label='Apellido Materno'
+          placeholder='Apellido Materno'
           control={control}
-          name="maternal_last_name"
-          htmlFor="maternal_last_name"
+          name='maternal_last_name'
+          htmlFor='maternal_last_name'
         />
         <TextField
-          label="Fecha de Nacimiento"
-          placeholder="Fecha de Nacimiento"
+          label='Fecha de Nacimiento'
+          placeholder='Fecha de Nacimiento'
           control={control}
-          name="birth_date"
-          htmlFor="birth_date"
-          type="date"
+          name='birth_date'
+          htmlFor='birth_date'
+          type='date'
         />
-        <TextField label="DNI" placeholder="DNI" control={control} name="dni" htmlFor="dni" />
+        <TextField
+          label='DNI'
+          placeholder='DNI'
+          control={control}
+          name='dni'
+          htmlFor='dni'
+        />
 
         <TextField
-          label="Teléfono"
-          placeholder="Teléfono"
+          label='Teléfono'
+          placeholder='Teléfono'
           control={control}
-          name="phone"
-          htmlFor="phone"
+          name='phone'
+          htmlFor='phone'
         />
         <TextField
-          label="Correo Electrónico"
-          placeholder="Correo Electrónico"
+          label='Correo Electrónico'
+          placeholder='Correo Electrónico'
           control={control}
-          name="email"
-          htmlFor="email"
-          readOnly={mode === "edit"}
+          name='email'
+          htmlFor='email'
+          readOnly={mode === 'edit'}
         />
-        <Button type="submit" className="col-span-2">
-          {mode === "create" ? "Guardar" : "Actualizar"}
+        <Button type='submit' className='col-span-2'>
+          {mode === 'create' ? 'Guardar' : 'Actualizar'}
         </Button>
       </form>
     </>
-  );
+  )
 }

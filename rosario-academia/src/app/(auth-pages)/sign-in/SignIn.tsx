@@ -10,11 +10,15 @@ import PasswordInput from '@/components/password-input'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { useSignIn } from '@/hooks/auth/use-signin'
+import { FormProvider, useForm } from 'react-hook-form'
+import { signInSchemaType, signInSchema } from '../schemas/sign-in-schema'
+import { zodResolver } from '@hookform/resolvers/zod'
 
 const SignIn = () => {
-  const { mutate: signIn } = useSignIn()
-  const [loading, setLoading] = useState(false)
-  const { push } = useRouter()
+  const { control } = useForm<signInSchemaType>({
+    resolver: zodResolver(signInSchema)
+  })
+  const { mutate: signIn, isPending: isLoading } = useSignIn()
   const [isRightPanelActive, setIsRightPanelActive] = useState(false)
 
   const handleRegisterClick = () => {
@@ -32,29 +36,18 @@ const SignIn = () => {
       email: formData.get('email') as string,
       password: formData.get('password') as string
     }
-    setLoading(true)
-    if (!credentials.email || !credentials.password) {
-      setLoading(false)
-      toast.error('Error', {
-        description: 'Por favor, completa todos los campos'
+    const parsed = signInSchema.safeParse(credentials)
+
+    if (!parsed.success) {
+      parsed.error.errors.forEach((err) => {
+        toast.error('Error', {
+          description: err.message
+        })
       })
       return
     }
-    signIn(credentials, {
-      onSuccess: (data) => {
-        setLoading(false)
-        toast.success('Éxito', {
-          description: 'Inicio de sesión exitoso'
-        })
-        push('/dashboard')
-      },
-      onError: (err) => {
-        setLoading(false)
-        toast.error('Error', {
-          description: err.message || 'Error al iniciar sesión'
-        })
-      }
-    })
+
+    signIn(credentials)
   }
 
   return (
@@ -83,9 +76,10 @@ const SignIn = () => {
                 name='password'
                 placeholder='Tu contraseña'
                 required
+                control={control}
               />
             </div>
-            <SubmitButton pending={loading} pendingText='Loggeando ...'>
+            <SubmitButton pending={isLoading} pendingText='Loggeando ...'>
               Iniciar Sesión
             </SubmitButton>
           </div>

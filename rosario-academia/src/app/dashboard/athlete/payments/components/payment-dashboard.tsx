@@ -12,61 +12,57 @@ import LoadingPage from '@/components/LoadingPage'
 import { useMemo, useCallback } from 'react'
 import { usePaymentData } from '@/hooks/use-payment-data'
 import { getDaysUntilNextPayment } from '@/utils/formats'
-import { useAthlete } from '../../provider'
-import { getPreferenceInitPoint } from '@/utils/auth/api'
-import { useAthleteStore } from '@/lib/stores/useUserStore'
+import { useUser } from '@/contexts/user-context'
+import { useFetchFullProfile } from '@/components/layout/dashboard/hooks/use-fetch-full-profile'
+import { useFetchInitUrl } from '../hooks/use-fetch-init-url'
+import { useFetchEnrollmentRequests } from '../hooks/use-fetch-enrollment-requests'
+import { useFetchPaymentsById } from '../../hooks/use-fetch-payments-by-id'
 
 export function PaymentDashboard() {
-  const athleteDetails = useAthleteStore((state) => state.athleteDetails)
-  const { data, isLoading, error } = usePaymentData(athleteDetails?.athlete_id)
-
-  // Calculate the days until the next payment
-  const daysUntilNextPayment = useMemo(() => {
-    return getDaysUntilNextPayment(data)
-  }, [data])
-
-  // Handle the buy button click, redirecting
-  const handleBuy = useCallback(async () => {
-    const [firstProfile] = data?.profile || []
-    if (firstProfile?.avatar_url === null) {
-      toast.error('Debes completar tu perfil antes de realizar el pago.')
-      return
-    }
+  const { userId } = useUser()
+  const { data: profile, isLoading } = useFetchFullProfile({ userId })
+  const { data: enrollmentRequests, isLoading: isLoadingEnrollment } =
+    useFetchEnrollmentRequests({ userId })
+  const { data: payments, isLoading: isLoadingPayments } = useFetchPaymentsById(
+    { id: userId }
+  )
+  console.log(enrollmentRequests, { payments })
+  const {
+    isLoading: isLoadingInit,
+    error: initError,
+    refetch
+  } = useFetchInitUrl({
+    userId,
+    planId: enrollmentRequests?.planId!,
+    scheduleId: enrollmentRequests?.scheduleId!
+  })
+  async function handleRedirectToPayment() {
     try {
-      const enrollmentRequestId = data?.enrollmentRequests[0].request_id
+      const result = await refetch()
 
-      const { data: url } = await getPreferenceInitPoint(
-        athleteDetails?.athlete_id as string,
-        enrollmentRequestId,
-        athleteDetails?.email as string
-      )
-      if (!url) {
-        toast.error(
-          'Hubo un error al procesar el pago. Por favor, intenta de nuevo.'
-        )
-        return
+      if (result.data?.init_point) {
+        window.location.href = result.data.init_point
+      } else {
+        console.error('No init_point found in response:', result.data)
+        toast.error('No se pudo obtener la URL de pago')
       }
-      toast.success(
-        'Pago procesado correctamente. Redirigiendo a MercadoPago...'
-      )
-      window.location.href = url
-    } catch (err) {
-      toast.error(
-        'Hubo un error al procesar el pago. Por favor, intenta de nuevo.'
-      )
+    } catch (error) {
+      toast.error('Error al procesar el pago')
+      console.error('Payment error:', error)
     }
-  }, [data])
+  }
 
-  if (!athleteDetails?.athlete_id) return <LoadingPage />
-  if (isLoading) return <LoadingPage />
-  if (error) return <div>Ocurrió un error inesperado</div>
+  const daysUntilNextPayment = useMemo(() => {
+    return getDaysUntilNextPayment(payments?.[0]?.end_date!)
+  }, [payments])
 
-  const { profile, enrollmentRequests: enrollment, payments } = data || {}
-
-  // Extract the first profile and the last payment
-  const [firstProfile] = profile || []
   const lastPayment = payments?.[0]
 
+  if (isLoadingInit || isLoading || isLoadingEnrollment || isLoadingPayments)
+    return <LoadingPage />
+
+  if (initError)
+    return <div>Ocurrió un error inesperado {initError.message}</div>
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -81,18 +77,18 @@ export function PaymentDashboard() {
       </header>
       <main className='container mx-auto space-y-8 p-4'>
         <PaymentStatus
-          isPaid={enrollment[0]?.status === 'approved'}
-          onPayNow={handleBuy}
-          payment_method={lastPayment?.payment_method || 'Yape'}
+          isPaid={enrollmentRequests?.status === 'approved'}
+          onPayNow={handleRedirectToPayment}
           last_payment_date={
             lastPayment?.payment_date
               ? new Date(lastPayment?.payment_date).toLocaleDateString()
               : 'N/A'
           }
-          payment_amount={lastPayment?.amount || 'N/A'}
+          payment_amount={lastPayment?.amount!}
           daysUntilNextPayment={daysUntilNextPayment}
+          disabled={!profile?.avatarUrl}
         />
-        {firstProfile?.avatar_url === null && (
+        {!profile?.avatarUrl && (
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}

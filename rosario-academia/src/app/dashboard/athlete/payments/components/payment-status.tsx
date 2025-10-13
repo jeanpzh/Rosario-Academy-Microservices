@@ -12,14 +12,14 @@ import { getPaymentStatus } from '@/utils/payment-status'
 interface PaymentStatusProps {
   isPaid: boolean
   onPayNow: () => void
-  payment_method: string
   last_payment_date: string
-  payment_amount: string
+  payment_amount: number
   daysUntilNextPayment: number
+  disabled: boolean
 }
 
 export function PaymentStatus({ ...props }: PaymentStatusProps) {
-  // Get the payment status
+  console.log(props)
   const { icon, message, colorClasses } = getPaymentStatus(
     props.isPaid,
     props.daysUntilNextPayment
@@ -51,11 +51,15 @@ export function PaymentStatus({ ...props }: PaymentStatusProps) {
         <CardFooter className='bg-gray-50 p-4 dark:bg-[#1e1e1e]'>
           {props.isPaid ? (
             <p className='text-sm text-gray-600 dark:text-gray-400'>
-              Último pago: {props.last_payment_date} | Método:{' '}
-              {props.payment_method} | Monto: S/. {props.payment_amount}
+              Último pago: {props.last_payment_date} | Monto: S/.{' '}
+              {props.payment_amount}
             </p>
           ) : (
-            <Button onClick={props.onPayNow} className='w-full'>
+            <Button
+              onClick={props.onPayNow}
+              className='w-full'
+              disabled={props.isPaid || props.disabled}
+            >
               Pagar ahora
             </Button>
           )}

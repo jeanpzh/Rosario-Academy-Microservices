@@ -1,6 +1,5 @@
 'use server'
-import { PAYMENT_URL } from '@/lib/config'
-import { getProfile } from '@/utils/auth/api'
+import { API_BASE_URL, USER_URL } from '@/lib/config'
 import { getDaysRemaining } from '@/utils/formats'
 import { createClient, getServiceClient } from '@/utils/supabase/server'
 import { cookies } from 'next/headers'
@@ -19,39 +18,51 @@ export const getToken = async () => {
 export const getProfileData = async () => {
   const token = await getToken()
   if (!token) {
-    console.error('No auth token found')
+    console.error('No auth token found in cookies')
     return null
   }
-
-  const data = await getProfile(token)
-
-  if (!data) {
-    console.error('No profile data received')
+  try {
+    const response = await fetch(`${USER_URL}/me`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    })
+    if (!response.ok) {
+      throw new Error('Error al obtener el perfil')
+    }
+    const data = await response.json()
+    return data
+  } catch (error) {
+    console.error('Error al obtener el perfil:', error)
     return null
   }
-  return data
 }
 
-export const getEnrollmentInfo = async (id: string) => {
+export const getEnrollmentInfo = async (
+  id: string
+): Promise<EnrollmentRequest | null> => {
   if (!id || id === 'undefined') {
     console.error('Invalid athlete ID provided:', id)
     return null
   }
+  const token = await getToken()
+  if (!token) {
+    console.error('No auth token found in cookies')
+    return null
+  }
   const res = await fetch(
-    `${PAYMENT_URL}/payment/athlete/${id}/enrollment-requests`,
+    `${API_BASE_URL}/athletes/${id}/enrollment-requests`,
     {
-      credentials: 'include'
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
     }
   )
   if (!res.ok) {
-    console.error('Error fetching enrollment info:', res.statusText)
-    return null
+    throw new Error('Error fetching enrollment info')
   }
-  const { data, success } = await res.json()
-  if (!success) {
-    console.error('Error fetching enrollment info:', data)
-    return null
-  }
+  const data = await res.json()
   return data
 }
 

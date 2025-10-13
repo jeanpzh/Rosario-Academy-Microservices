@@ -1,8 +1,8 @@
 import React from "react";
 
-export default function CardSkeleton() {
+export default function CardSkeleton({ className }: { className?: string }) {
   return (
-    <div className="animate-pulse rounded border p-4 shadow">
+    <div className={`animate-pulse rounded border p-4 shadow ${className}`}>
       <div className="mb-2 h-4 w-32 rounded bg-gray-300"></div>
       <div className="mb-4 h-6 w-full rounded bg-gray-300"></div>
       <div className="space-y-2">

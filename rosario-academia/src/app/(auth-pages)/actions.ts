@@ -5,7 +5,7 @@ import { createClient } from '@/utils/supabase/server'
 import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { signUpSchema } from '@/app/(auth-pages)/schemas/sign-up-schema'
-import { AUTH_URL, USER_URL } from '@/lib/config'
+import { API_BASE_URL } from '@/lib/config'
 
 /**
  * Handles user sign-up.
@@ -47,7 +47,7 @@ export const signUpAction = async (formData: unknown) => {
       first_name: validatedData.data.firstName,
       paternal_last_name: validatedData.data.paternalLastName,
       maternal_last_name: validatedData.data.maternalLastName,
-      birth_date: validatedData.data.birthDate,
+      birth_date: validatedData.data.birthdate,
       dni: validatedData.data.dni,
       level: validatedData.data.level,
       role: 'deportista',
@@ -261,7 +261,7 @@ export async function resetPasswordAction(formData: FormData) {
  * @returns A redirect response to the logout cleanup route.
  */
 export const signOutAction = async () => {
-  const res = await fetch(`${AUTH_URL}/signout`, {
+  const res = await fetch(`${API_BASE_URL}/auth/signout`, {
     credentials: 'include',
     method: 'POST'
   })
@@ -321,7 +321,7 @@ interface ReturnResponse {
 export const getShifts = async (): Promise<
   ReturnResponse[] | { status: number; data: any } | undefined
 > => {
-  const res = await fetch(`${USER_URL}/shifts`, {
+  const res = await fetch(`${API_BASE_URL}/users/shifts`, {
     method: 'GET',
     headers: { 'Content-Type': 'application/json' }
   })

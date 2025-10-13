@@ -1,5 +1,8 @@
-import { type SignUpSchema } from '@/app/(auth-pages)/schemas/sign-up-schema'
-import { AUTH_URL } from '@/lib/config'
+import {
+  SignupSchema,
+  SignupRequest
+} from '@/app/(auth-pages)/schemas/sign-up-schema'
+import { API_BASE_URL } from '@/lib/config'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 
@@ -7,20 +10,24 @@ export const useSignUp = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async (userData: SignUpSchema) => {
-      const backendData = {
+    mutationFn: async (userData: SignupSchema) => {
+      const backendData: SignupRequest = {
         email: userData.email,
         password: userData.password,
-        first_name: userData.firstName,
-        paternal_last_name: userData.paternalLastName,
-        maternal_last_name: userData.maternalLastName,
-        birth_date: userData.birthDate,
+        firstName: userData.firstName,
+        paternalLastName: userData.paternalLastName,
+        maternalLastName: userData.maternalLastName,
+        birthdate: userData.birthdate,
         dni: userData.dni,
-        level: userData.level,
         phone: userData.phone,
-        role: 'deportista'
+        role: 'deportista',
+        metadata: {
+          level: userData.level,
+          planId: '1'
+        }
       }
-      const response = await fetch(`${AUTH_URL}/signup`, {
+
+      const response = await fetch(`${API_BASE_URL}/auth/signup`, {
         method: 'POST',
         body: JSON.stringify(backendData),
         headers: {
@@ -35,14 +42,11 @@ export const useSignUp = () => {
       return await response.json()
     },
     onSuccess: (data) => {
-      /* Link con toast */
-      toast.success('Registro exitoso', {
-        description: 'Ya puedes iniciar sesión con tu cuenta.'
-      })
-      window.location.href = '/auth/sign-in'
+      window.location.href = '/sign-in'
       queryClient.setQueryData(['user'], data.user)
     },
     onError: (error: Error) => {
+      console.log(error)
       toast.error(error.message || 'Error al registrarse')
       return {
         status: 500,

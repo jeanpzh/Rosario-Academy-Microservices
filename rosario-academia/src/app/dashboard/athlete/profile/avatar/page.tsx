@@ -9,7 +9,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useRouter } from 'next/navigation'
 import AvatarEditor from 'react-avatar-editor'
 import { toast } from 'sonner'
-import { useAthleteStore } from '@/lib/stores/useUserStore'
 import { getDaysRemaining } from '@/utils/formats'
 import LockedAvatarPage from '@/app/dashboard/athlete/profile/components/locked-avatar-page'
 import {
@@ -21,9 +20,15 @@ import {
   DialogTrigger
 } from '@/components/ui/dialog'
 import { uploadImage } from '@/utils/auth/api'
+import { useUser } from '@/contexts/user-context'
+import { useFetchFullProfile } from '@/components/layout/dashboard/hooks/use-fetch-full-profile'
+import LoadingPage from '@/components/LoadingPage'
+import { useUploadImage } from './hooks/use-upload-image'
 
 export default function AvatarUploadPage() {
-  const { setImg, athleteDetails } = useAthleteStore()
+  const { userId } = useUser()
+  const { data: profile, isLoading } = useFetchFullProfile({ userId })
+  const { mutateAsync: uploadImage } = useUploadImage()
   const [image, setImage] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
   const [editor, setEditor] = useState<AvatarEditor | null>(null)
@@ -56,26 +61,21 @@ export default function AvatarUploadPage() {
     setIsConfirmDialogOpen(false)
     const canvas = editor.getImageScaledToCanvas()
     canvas.toBlob(async (blob: Blob | null) => {
-      // Guardar la foto y mostrar el toast
-      toast.promise(uploadImage(blob, athleteDetails?.profile.id), {
+      toast.promise(uploadImage({ blob, id: userId }), {
         loading: 'Guardando foto...',
         success: (res) => {
-          setImg(res.data as string)
           return res.message
         },
         error: (err) => err.message
       })
-      // Si fue exitoso, redirecciona al perfil
       router.push('/dashboard/athlete/profile')
     })
   }
 
-  // lastChange es la fecha del último cambio, disponible en el estado global del atleta
-  const lastChange = athleteDetails?.profile.last_avatar_change
+  const lastChange = profile?.lastAvatarChange
+  const daysRemaining = getDaysRemaining(lastChange!)
 
-  // Calcula los días restantes para poder cambiar la foto (espera 30 días)
-  const daysRemaining = getDaysRemaining(lastChange as string)
-
+  if (isLoading) return <LoadingPage />
   return (
     <>
       {daysRemaining === 0 ? (

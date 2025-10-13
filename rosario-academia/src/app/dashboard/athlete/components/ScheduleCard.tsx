@@ -1,21 +1,26 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { useAthleteStore } from '@/lib/stores/useUserStore'
+import { useFetchSchedule } from '../hooks/use-fetch-schedule'
+import { useUser } from '@/contexts/user-context'
+import CardSkeleton from '../../components/CardSkeleton'
+export function ScheduleCard() {
+  const { userId } = useUser()
 
-export function ScheduleCard({ className }: { className?: string }) {
-  const athlete = useAthleteStore((state) => state.athleteDetails)
+  const { data: schedules, isLoading } = useFetchSchedule({ athleteId: userId })
+
+  if (isLoading) return <CardSkeleton className='md:col-span-2 lg:col-span-1' />
+
   return (
-    <Card className={className}>
+    <Card className='md:col-span-2 lg:col-span-1'>
       <CardHeader>
         <CardTitle>Mi Horario</CardTitle>
       </CardHeader>
       <CardContent>
         <ul className='space-y-2'>
-          {athlete?.enrollment_requests.map((request: any, index: number) => (
+          {schedules?.map((schedule: any, index: number) => (
             <li key={index}>
               <p className='text-sm text-muted-foreground'>
-                {request.requested_schedule.weekday} de{' '}
-                {request.requested_schedule.start_time} a{' '}
-                {request.requested_schedule.end_time}
+                {schedule.weekday} de {schedule.start_time} a{' '}
+                {schedule.end_time}
               </p>
             </li>
           ))}

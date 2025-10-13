@@ -31,13 +31,9 @@ export function getDaysRemaining(lastChange: string | null, period = 30) {
   return daysRemaining > 0 ? daysRemaining : 0
 }
 
-export const getDaysUntilNextPayment = (data: any) => {
-  const payments = data?.payments
-  const subscriptionData = data?.subscription
-  if (!payments || payments.length === 0 || !subscriptionData?.end_date)
-    return 0
-
-  const nextPaymentDate = new Date(subscriptionData.end_date)
+export const getDaysUntilNextPayment = (endDate?: string) => {
+  if (!endDate) return 0
+  const nextPaymentDate = new Date(endDate)
   const today = new Date()
   const diffTime = nextPaymentDate.getTime() - today.getTime()
 

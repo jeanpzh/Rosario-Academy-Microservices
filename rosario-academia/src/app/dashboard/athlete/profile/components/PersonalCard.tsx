@@ -9,16 +9,12 @@ import { Button } from '@/components/ui/button'
 import ProfileSectionCard from '@/app/dashboard/athlete/components/ProfileSectionCard'
 import { LevelToSpanish } from '@/app/dashboard/athlete/profile/types'
 import { Scale, Ruler, Camera, Calendar, IndentIcon } from 'lucide-react'
-import CardSkeleton from '@/app/dashboard/components/CardSkeleton'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
-import { useAthleteStore } from '@/lib/stores/useUserStore'
 import { getDaysRemaining } from '@/utils/formats'
-import { Profile } from '@/lib/types/Profile'
-import { useFetchLastAvatarChangeQuery } from '@/hooks/use-fetch-last-avatar-change'
 
 export interface ProfileCardProps {
-  userProfile: Profile
+  userProfile: User
   athlete: AthleteState
   isEditing: boolean
 }
@@ -28,24 +24,17 @@ export function PersonalCard({
   athlete,
   isEditing
 }: ProfileCardProps) {
-  console.log('User Profile:', userProfile.avatar_url)
   const { push } = useRouter()
-  const { setLastAvatarChange } = useAthleteStore()
 
   const onFormattedDate = (date: string) => {
     const formattedDate = new Date(date)
     return formattedDate.toLocaleDateString('es-ES')
   }
-  const {
-    data: lastAvatarChangeData,
-    isLoading: lastAvatarChangeLoading,
-    error: lastAvatarChangeError
-  } = useFetchLastAvatarChangeQuery({
-    setLastAvatarChange,
-    id: userProfile.id as string
-  })
+
   const onAvatarClick = () => {
-    const daysRemaining = getDaysRemaining(lastAvatarChangeData as string)
+    const daysRemaining = getDaysRemaining(
+      userProfile.lastAvatarChange as string
+    )
     if (daysRemaining > 0) {
       toast.info('Info', {
         description:
@@ -61,9 +50,6 @@ export function PersonalCard({
     push('/dashboard/athlete/profile/avatar')
   }
 
-  if (lastAvatarChangeLoading) return <CardSkeleton />
-  if (lastAvatarChangeError) return null
-
   return (
     <motion.div
       className='max-md:col-span-2'
@@ -77,12 +63,12 @@ export function PersonalCard({
             <div className='relative'>
               <Avatar className='size-32 border-4 border-primary/10'>
                 <AvatarImage
-                  src={userProfile?.avatar_url as string}
-                  alt={userProfile?.first_name}
+                  src={userProfile?.avatarUrl as string}
+                  alt={userProfile?.firstName}
                 />
                 <AvatarFallback>
-                  {userProfile?.first_name?.[0]}
-                  {userProfile?.paternal_last_name?.[0]}
+                  {userProfile?.firstName?.[0]}
+                  {userProfile?.paternalLastName?.[0]}
                 </AvatarFallback>
               </Avatar>
               {isEditing && (
@@ -98,10 +84,10 @@ export function PersonalCard({
             </div>
             <div className='space-y-1 text-center'>
               <h2 className='text-xl font-semibold'>
-                {userProfile?.first_name} {userProfile?.paternal_last_name}
+                {userProfile?.firstName} {userProfile?.paternalLastName}
               </h2>
               <p className='text-sm text-muted-foreground'>
-                {userProfile?.maternal_last_name}
+                {userProfile?.maternalLastName}
               </p>
             </div>
             <div className='flex gap-2'>
@@ -145,8 +131,8 @@ export function PersonalCard({
               icon={Calendar}
               label='Fecha de Nacimiento'
               value={
-                userProfile?.birth_date
-                  ? onFormattedDate(userProfile?.birth_date)
+                userProfile?.birthDate
+                  ? onFormattedDate(userProfile?.birthDate)
                   : 'En proceso...'
               }
             />

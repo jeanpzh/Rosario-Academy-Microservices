@@ -1,26 +1,54 @@
-import { updateStatusAthleteAction } from "@/app/dashboard/actions/athleteActions";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { updateStatusAthleteAction } from '@/app/dashboard/actions/athleteActions'
+import { API_BASE_URL } from '@/lib/config'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
+
+const updateAthleteStatus = async ({
+  id,
+  status
+}: {
+  id: string
+  status: 'approved' | 'rejected' | 'pending'
+}) => {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/worker/${id}/athlete/status`,
+      {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify({ status })
+      }
+    )
+    if (!response.ok) {
+      throw new Error('Error updating athlete status')
+    }
+    return await response.json()
+  } catch (error) {
+    console.error(error)
+    throw new Error('Error updating athlete status')
+  }
+}
 
 export function useUpdateAthleteStatus() {
-  const queryClient = useQueryClient();
-
+  const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async ({
       id,
-      status,
+      status
     }: {
-      id: string;
-      status: "approved" | "rejected" | "pending";
+      id: string
+      status: 'approved' | 'rejected' | 'pending'
     }) => {
-      return toast.promise(updateStatusAthleteAction(id, status), {
-        loading: "Actualizando estado del atleta...",
-        success: "Estado actualizado exitosamente",
-        error: (err) => `Error al actualizar el estado: ${err.message}`,
-      });
+      return updateAthleteStatus({ id, status })
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["athletes"] });
-    },
-  });
+      queryClient.invalidateQueries({
+        queryKey: ['athletes'],
+        refetchType: 'all'
+      })
+    }
+  })
 }

@@ -1,0 +1,48 @@
+syntax = "proto3";
+package user;
+import "google/protobuf/struct.proto";
+
+service UserService {
+  rpc SaveUser (SaveUserRequest) returns (SaveUserResponse);
+  rpc VerifyDNI (VerifyDNIRequest) returns (VerifyDNIResponse);
+  rpc VerifyEmail (VerifyEmailRequest) returns (VerifyEmailResponse);
+}
+
+// Request para guardar un nuevo usuario
+message SaveUserRequest {
+  User user = 1;
+}
+
+// Response al guardar usuario
+message SaveUserResponse {
+  bool success = 1;           // Indica si se guardó correctamente
+  string message = 2;         // Mensaje descriptivo
+  User user = 3;              // Usuario guardado (opcional)
+}
+
+message User {
+  string id = 1;
+  string email = 2;
+  string firstName = 3;
+  string paternalLastName = 4;
+  string maternalLastName = 5;
+  string birthdate = 6;
+  string dni = 7;
+  string phone = 8;
+  string role = 9;
+  string avatar = 10;
+  google.protobuf.Struct  metadata = 11;
+}
+
+message VerifyDNIRequest {
+  string dni = 1;
+}
+message VerifyDNIResponse {
+  bool isValid = 1;
+}
+message VerifyEmailRequest{
+  string email = 1;
+}
+message VerifyEmailResponse {
+  bool isValid = 1;
+}

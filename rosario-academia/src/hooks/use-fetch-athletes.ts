@@ -1,29 +1,24 @@
-import { USER_URL } from '@/lib/config'
-import { Athlete } from '@/lib/types/AthleteTable'
+import { API_BASE_URL } from '@/lib/config'
 import { useQuery } from '@tanstack/react-query'
 
-async function getAthletesAction() {
-  const res = await fetch(`${USER_URL}/athletes`, {
+const getAthletes = async () => {
+  const response = await fetch(`${API_BASE_URL}/worker/athletes`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json'
     },
     credentials: 'include'
   })
-  if (!res.ok) {
-    throw new Error('Error al obtener deportistas')
+  if (!response.ok) {
+    throw new Error('Error fetching athletes count')
   }
-  const { data, error } = await res.json()
-  if (error) {
-    throw new Error('Error al obtener deportistas')
-  }
-  return data
+  return await response.json()
 }
 
-export function useFetchAthletesQuery() {
-  return useQuery<Athlete[]>({
+export function useFechAthletes() {
+  return useQuery({
     queryKey: ['athletes'],
-    queryFn: getAthletesAction,
+    queryFn: getAthletes,
     staleTime: 1000 * 60 * 5
   })
 }

@@ -8,14 +8,30 @@ export default async function AuthButton() {
 
   const {
     data: { user },
+    error,
   } = await supabase.auth.getUser();
+
+  // Si hay error o no hay usuario, mostrar botones de login
+  if (error || !user) {
+    return (
+      <div className="flex gap-2">
+        <Button asChild size="sm" variant={"outline"}>
+          <Link href="/sign-in">Iniciar Sesión</Link>
+        </Button>
+        <Button asChild size="sm" variant={"default"}>
+          <Link href="/sign-up">Registrar</Link>
+        </Button>
+      </div>
+    );
+  }
+
   const { data: profile } = await supabase
     .from("profiles")
     .select("role")
-    .eq("id", user?.id)
+    .eq("id", user.id)
     .single();
 
-  return user ? (
+  return (
     <div className="flex items-center gap-4">
       <Button asChild size="sm" variant={"default"}>
         <Link
@@ -37,15 +53,6 @@ export default async function AuthButton() {
           Sign out
         </Button>
       </form>
-    </div>
-  ) : (
-    <div className="flex gap-2">
-      <Button asChild size="sm" variant={"outline"}>
-        <Link href="/sign-in">Iniciar Sesión</Link>
-      </Button>
-      <Button asChild size="sm" variant={"default"}>
-        <Link href="/sign-up">Registrar</Link>
-      </Button>
     </div>
   );
 }

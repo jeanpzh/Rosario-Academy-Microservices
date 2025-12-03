@@ -34,6 +34,8 @@ services:
     hostname: user-service
     env_file:
       - .env.local
+    environment:
+      - KAFKA_BROKERS=redpanda:29092
     networks:
       - backend
 
@@ -45,6 +47,8 @@ services:
     hostname: payment-service
     env_file:
       - .env.local
+    environment:
+      - KAFKA_BROKERS=redpanda:29092
     networks:
       - backend
     depends_on:

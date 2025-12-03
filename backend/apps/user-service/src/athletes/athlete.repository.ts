@@ -387,7 +387,11 @@ export class AthleteRepositoryImpl implements AthleteRepository {
       return {
         success: true,
         message: 'Deportista registrado correctamente',
-        data: signupData.user
+        data: signupData.user,
+        credentials: {
+          email: data.email,
+          password: password
+        }
       }
     } catch (error) {
       Logger.error(`Failed to create athlete: ${error.message}`)

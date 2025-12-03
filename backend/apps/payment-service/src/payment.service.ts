@@ -62,9 +62,9 @@ export class PaymentService {
           },
 
           back_urls: {
-            success: `https://rosario-academia.vercel.app/dashboard/athlete/payments?status=success&external_reference=${externalReference}`,
-            failure: `https://rosario-academia.vercel.app/dashboard/athlete/payments?status=failure&external_reference=${externalReference}`,
-            pending: `https://rosario-academia.vercel.app/dashboard/athlete/payments?status=pending&external_reference=${externalReference}`
+            success: `${frontendUrl}/dashboard/athlete/payments?status=success&external_reference=${externalReference}`,
+            failure: `${frontendUrl}/dashboard/athlete/payments?status=failure&external_reference=${externalReference}`,
+            pending: `${frontendUrl}/dashboard/athlete/payments?status=pending&external_reference=${externalReference}`
           },
           auto_return: 'approved',
 

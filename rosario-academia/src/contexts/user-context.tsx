@@ -58,8 +58,10 @@ export function UserProvider({ children, value }: UserProviderProps) {
 export function useUser() {
   const context = useContext(UserContext)
 
+  // Durante SSR/pre-rendering, retornar valores por defecto
+  // en lugar de lanzar error
   if (context === undefined) {
-    throw new Error('useUser debe ser usado dentro de un UserProvider')
+    return { userId: '', email: undefined } as UserContextValue
   }
 
   return context

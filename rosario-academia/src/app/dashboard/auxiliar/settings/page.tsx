@@ -1,5 +1,9 @@
-import { ChangePasswordForm } from "@/components/ChangePasswordForm";
+'use client'
+
+import { ChangePasswordForm } from '@/components/ChangePasswordForm'
+import { useUser } from '@/contexts/user-context'
 
 export default function ConfiguracionPage() {
-  return <ChangePasswordForm />;
+  const { userId } = useUser()
+  return <ChangePasswordForm userId={userId} />
 }

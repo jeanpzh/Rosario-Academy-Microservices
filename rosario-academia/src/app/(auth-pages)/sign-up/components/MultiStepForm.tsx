@@ -37,7 +37,7 @@ export default function MultiStepForm({ steps }: { steps: FormStep[] }) {
     if (!isValid) return
     const currentStepValues = methods.getValues(currentStep.fields)
     const formValues = Object.fromEntries(
-      currentStep.fields.map((field) => [field, currentStepValues[field] ?? ''])
+      currentStep.fields.map((field, index) => [field, currentStepValues[index] ?? ''])
     )
 
     if (!currentStep.validationSchema) return

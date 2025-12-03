@@ -49,7 +49,7 @@ export class PaymentService {
               currency_id: 'PEN',
               description:
                 'Pago para inscripción y creación/renovación de suscripción',
-              unit_price: unitPrice
+              unit_price: 2 // Deberia ser UNIT PRICE, pero por efectos de prueba se deja en 2
             }
           ],
           metadata: {

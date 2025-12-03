@@ -1,11 +1,5 @@
 import { Expose } from 'class-transformer'
-import {
-  IsNotEmpty,
-  IsNumber,
-  IsString,
-  IsDateString,
-  IsUUID
-} from 'class-validator'
+import { IsNotEmpty, IsNumber, IsString, IsDateString } from 'class-validator'
 
 @Expose()
 export class CreatePaymentRecordDto {
@@ -14,7 +8,7 @@ export class CreatePaymentRecordDto {
   amount: number
 
   @IsNotEmpty()
-  @IsUUID()
+  @IsString()
   payment_method_id: string
 
   @IsNotEmpty()

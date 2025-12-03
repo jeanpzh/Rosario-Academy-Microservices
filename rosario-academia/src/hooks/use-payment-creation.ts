@@ -2,29 +2,27 @@
 
 import { API_BASE_URL } from '@/lib/config'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 
 const createPaymentRecord = async (athleteId: string, formData: Payment) => {
-  try {
-    const response = await fetch(
-      `${API_BASE_URL}/payment/athlete/${athleteId}/create`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(formData),
-        credentials: 'include'
-      }
-    )
-
-    if (!response.ok) {
-      throw new Error('Error al crear el pago')
+  const response = await fetch(
+    `${API_BASE_URL}/payment/athlete/${athleteId}/create`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(formData),
+      credentials: 'include'
     }
+  )
 
-    return response.json()
-  } catch (error) {
-    throw new Error('Error al crear el pago')
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}))
+    throw new Error(errorData.message || 'Error al crear el pago')
   }
+
+  return response.json()
 }
 
 export function usePaymentCreation(athleteId: string) {
@@ -38,16 +36,11 @@ export function usePaymentCreation(athleteId: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['athlete', athleteId] })
       queryClient.invalidateQueries({ queryKey: ['payments', athleteId] })
+      queryClient.invalidateQueries({ queryKey: ['athletesWithPayments'] })
+      toast.success('¡Pago registrado exitosamente!')
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Error al crear el pago')
     }
   })
-
-  /*  // Función para crear pago con notificaciones toast
-  const createPayment = async (formData: Payment) => {
-    return toast.promise(createPaymentMutation.mutateAsync(formData), {
-      loading: "Creando registro de pago...",
-      success: "¡Pago registrado exitosamente!",
-      error: (err) => `Error al registrar el pago: ${err.message}`,
-      position: "bottom-left",
-    });
-  }; */
 }

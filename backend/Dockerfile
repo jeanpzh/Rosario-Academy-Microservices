@@ -42,13 +42,18 @@ EXPOSE 8000
 # El código se monta como volumen, no se copia aquí
 CMD ["npm", "run", "start:dev"]
 
+# Production dependencies stage
+FROM node:24-alpine AS prod-deps
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+
 # Gateway
 FROM node:24-alpine AS gateway
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci --only=production
 COPY --from=base /app/dist ./dist
-COPY --from=base /app/node_modules ./node_modules
+COPY --from=prod-deps /app/node_modules ./node_modules
 EXPOSE 8000
 CMD ["node", "dist/apps/gateway/main.js"]
 
@@ -56,9 +61,8 @@ CMD ["node", "dist/apps/gateway/main.js"]
 FROM node:24-alpine AS auth-service
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci --only=production
 COPY --from=base /app/dist ./dist
-COPY --from=base /app/node_modules ./node_modules
+COPY --from=prod-deps /app/node_modules ./node_modules
 # Copiar archivos .proto para gRPC
 COPY --from=base /app/apps/common/proto ./apps/common/proto
 CMD ["node", "dist/apps/auth-service/main.js"]
@@ -67,9 +71,8 @@ CMD ["node", "dist/apps/auth-service/main.js"]
 FROM node:24-alpine AS user-service
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci --only=production
 COPY --from=base /app/dist ./dist
-COPY --from=base /app/node_modules ./node_modules
+COPY --from=prod-deps /app/node_modules ./node_modules
 # Copiar archivos .proto para gRPC
 COPY --from=base /app/apps/common/proto ./apps/common/proto
 CMD ["node", "dist/apps/user-service/main.js"]
@@ -78,16 +81,15 @@ CMD ["node", "dist/apps/user-service/main.js"]
 FROM node:24-alpine AS payment-service
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci --only=production
 COPY --from=base /app/dist ./dist
-COPY --from=base /app/node_modules ./node_modules
+COPY --from=prod-deps /app/node_modules ./node_modules
 CMD ["node", "dist/apps/payment-service/main.js"]
 
 # Backend (app principal)
 FROM node:24-alpine AS backend
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci --only=production
 COPY --from=base /app/dist ./dist
+COPY --from=prod-deps /app/node_modules ./node_modules
 CMD ["npm", "run", "start:prod"]
 

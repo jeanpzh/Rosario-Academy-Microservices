@@ -1,4 +1,4 @@
-import { Controller, Logger } from '@nestjs/common'
+import { Controller } from '@nestjs/common'
 import { MessagePattern } from '@nestjs/microservices'
 import { UserRepository } from './user.port'
 import { UpdateProfileDto } from '../dto/update-profile.dto'

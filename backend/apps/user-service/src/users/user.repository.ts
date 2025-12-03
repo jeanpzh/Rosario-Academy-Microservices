@@ -158,6 +158,7 @@ export class UserRepositoryImpl implements UserRepository {
           start_time,
           end_time,
           available_spot,
+          plan_id,
           shifts:shifts!inner(weekday, schedule_id)
           `
           )
@@ -171,7 +172,8 @@ export class UserRepositoryImpl implements UserRepository {
         id: s.level,
         name: s.schedule_name,
         description: `${s.start_time} - ${s.end_time} (${(s.shifts ?? []).map((x) => x.weekday).join(', ')})`,
-        spots: s.available_spot
+        spots: s.available_spot,
+        planId: s.plan_id
       }))
       return shiftsMapped
     } catch (error) {

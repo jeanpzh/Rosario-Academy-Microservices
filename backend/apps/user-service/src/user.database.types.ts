@@ -141,6 +141,27 @@ export type Database = {
           }
         ]
       }
+      plans: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: number
+          name: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: number
+          name: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: number
+          name?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -200,6 +221,7 @@ export type Database = {
           available_spot: number | null
           end_time: string
           level: 'beginner' | 'intermediate' | 'advanced'
+          plan_id: number | null
           schedule_id: number
           schedule_name: string
           start_time: string
@@ -208,6 +230,7 @@ export type Database = {
           available_spot?: number | null
           end_time: string
           level: 'beginner' | 'intermediate' | 'advanced'
+          plan_id?: number | null
           schedule_id?: never
           schedule_name: string
           start_time: string
@@ -216,11 +239,20 @@ export type Database = {
           available_spot?: number | null
           end_time?: string
           level?: 'beginner' | 'intermediate' | 'advanced'
+          plan_id?: number | null
           schedule_id?: never
           schedule_name?: string
           start_time?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: 'schedules_plan_id_fkey'
+            columns: ['plan_id']
+            isOneToOne: false
+            referencedRelation: 'plans'
+            referencedColumns: ['id']
+          }
+        ]
       }
       shifts: {
         Row: {
@@ -339,7 +371,7 @@ export type Database = {
         }[]
       }
       get_athlete_distribution: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           level: string
           total: number
@@ -355,7 +387,7 @@ export type Database = {
         }[]
       }
       get_athletes: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           avatar_url: string
           birth_date: string

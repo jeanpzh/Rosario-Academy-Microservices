@@ -2,7 +2,7 @@ import { BadRequestException, Inject, Injectable, Logger } from '@nestjs/common'
 import { PostgrestError, SupabaseClient } from '@supabase/supabase-js'
 import { Athlete } from './athlete.entity'
 import { Database } from '../user.database.types'
-import { AthleteRepository, SubscriptionUpdateData } from './athlete.boundarie'
+import { AthleteRepository } from './athlete.boundarie'
 import { SUPABASE_CLIENT } from '@common/supabase/supabase.provider'
 import { CacheBoundarie } from '@common/cache/cache.boundarie'
 import { randomBytes, randomUUID } from 'crypto'
@@ -290,7 +290,6 @@ export class AthleteRepositoryImpl implements AthleteRepository {
   }
   async getEnrollmentRequests(athleteId: string): Promise<any> {
     try {
-
       const cached = await this.cache.get<any>(
         `enrollment_requests_${athleteId}`
       )
@@ -303,7 +302,7 @@ export class AthleteRepositoryImpl implements AthleteRepository {
       const { data, error } = await this.supabaseClient
         .schema('users')
         .from('enrollment_requests')
-        .select('requested_schedule_id, requested_plan_id, status')
+        .select('requested_schedule_id(plan_id, schedule_id), status')
         .eq('athlete_id', athleteId)
         .single()
 

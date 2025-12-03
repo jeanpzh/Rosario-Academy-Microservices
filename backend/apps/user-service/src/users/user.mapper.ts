@@ -65,7 +65,8 @@ export class UserMapper {
       user.birthdate,
       user.avatar,
       null,
-      user.metadata!
+      null,
+      user.metadata
     )
   }
 }

@@ -58,7 +58,7 @@ export function PaymentStatus({ ...props }: PaymentStatusProps) {
             <Button
               onClick={props.onPayNow}
               className='w-full'
-              disabled={props.isPaid || props.disabled}
+              disabled={props.disabled}
             >
               Pagar ahora
             </Button>

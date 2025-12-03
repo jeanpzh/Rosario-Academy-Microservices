@@ -5,12 +5,10 @@ import { toast } from 'sonner'
 import { PaymentStatus } from './payment-status'
 import { PaymentHistory } from './payment-history'
 import { BenefitsSection } from './benefits-section'
-import { submit } from '@/app/dashboard/athlete/actions'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import LoadingPage from '@/components/LoadingPage'
-import { useMemo, useCallback } from 'react'
-import { usePaymentData } from '@/hooks/use-payment-data'
+import { useMemo } from 'react'
 import { getDaysUntilNextPayment } from '@/utils/formats'
 import { useUser } from '@/contexts/user-context'
 import { useFetchFullProfile } from '@/components/layout/dashboard/hooks/use-fetch-full-profile'
@@ -26,16 +24,21 @@ export function PaymentDashboard() {
   const { data: payments, isLoading: isLoadingPayments } = useFetchPaymentsById(
     { id: userId }
   )
-  console.log(enrollmentRequests, { payments })
+  console.log({
+    enrollmentRequests,
+    planId: enrollmentRequests?.requested_schedule_id.plan_id!,
+    schedule_id: enrollmentRequests?.requested_schedule_id.schedule_id
+  })
   const {
     isLoading: isLoadingInit,
     error: initError,
     refetch
   } = useFetchInitUrl({
     userId,
-    planId: enrollmentRequests?.planId!,
-    scheduleId: enrollmentRequests?.scheduleId!
+    planId: enrollmentRequests?.requested_schedule_id.plan_id!,
+    scheduleId: enrollmentRequests?.requested_schedule_id.schedule_id!
   })
+  console.log({ enrollmentRequests })
   async function handleRedirectToPayment() {
     try {
       const result = await refetch()

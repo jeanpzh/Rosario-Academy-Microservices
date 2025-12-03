@@ -17,6 +17,8 @@ import { CloudinaryService } from './services/cloudinary.service'
 import { WorkerController } from './user/gateway.worker.controller'
 import { RolesGuard } from './auth/guards/roles.guard'
 
+import { HealthController } from './health.controller'
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -76,7 +78,8 @@ import { RolesGuard } from './auth/guards/roles.guard'
     UsersController,
     PaymentController,
     AthletesController,
-    WorkerController
+    WorkerController,
+    HealthController
   ],
   providers: [
     CookieService,

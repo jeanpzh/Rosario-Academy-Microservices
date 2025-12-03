@@ -1,16 +1,20 @@
-import { Injectable, Res } from '@nestjs/common'
+import { Injectable, Logger, Res } from '@nestjs/common'
 import { Response } from 'express'
 
 @Injectable()
 export class CookieService {
   private getCookieOptions() {
     const isProduction = process.env.NODE_ENV === 'production'
+    Logger.log(
+      `Setting cookie options for ${isProduction ? 'production' : 'development'} environment`,
+      'CookieService'
+    )
     return {
       httpOnly: true,
       secure: isProduction, // HTTPS requerido en producción
-      sameSite: isProduction ? ('none' as const) : ('lax' as const), // 'none' para cross-origin en producción
-      path: '/'
-      // domain: isProduction ? '.tudominio.com' : undefined
+      sameSite: isProduction ? ('lax' as const) : ('lax' as const), // 'lax' es suficiente para mismo dominio
+      path: '/',
+      domain: isProduction ? '.fisib22.com' : undefined // Compartir cookie entre subdominios
     }
   }
 

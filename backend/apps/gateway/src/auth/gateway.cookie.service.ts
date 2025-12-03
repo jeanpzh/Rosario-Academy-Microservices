@@ -3,16 +3,24 @@ import { Response } from 'express'
 
 @Injectable()
 export class CookieService {
+  private getCookieOptions() {
+    const isProduction = process.env.NODE_ENV === 'production'
+    return {
+      httpOnly: true,
+      secure: isProduction, // HTTPS requerido en producción
+      sameSite: isProduction ? ('none' as const) : ('lax' as const), // 'none' para cross-origin en producción
+      path: '/'
+      // domain: isProduction ? '.tudominio.com' : undefined
+    }
+  }
+
   setAuthCookies(
     @Res({ passthrough: true }) res: Response,
     accessToken: string
   ) {
     res.cookie('auth_session', accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 1000, // 1 hora
-      path: '/'
+      ...this.getCookieOptions(),
+      maxAge: 60 * 60 * 1000 // 1 hora
     })
   }
   setRefreshTokenCookie(
@@ -20,27 +28,14 @@ export class CookieService {
     refreshToken: string
   ) {
     res.cookie('refresh_token', refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
-      path: '/'
+      ...this.getCookieOptions(),
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 días
     })
   }
   clearAuthCookies(@Res({ passthrough: true }) res: Response) {
-    res.clearCookie('auth_session', {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/'
-    })
+    res.clearCookie('auth_session', this.getCookieOptions())
   }
   clearRefreshTokenCookie(@Res({ passthrough: true }) res: Response) {
-    res.clearCookie('refresh_token', {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/'
-    })
+    res.clearCookie('refresh_token', this.getCookieOptions())
   }
 }

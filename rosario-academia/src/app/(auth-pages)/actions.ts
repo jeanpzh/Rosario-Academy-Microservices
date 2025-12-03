@@ -319,16 +319,18 @@ interface ReturnResponse {
  *
  * @returns An array of shift objects or an error object.
  */
-export const getShifts = async (): Promise<
-  ReturnResponse[] | { status: number; data: any } | undefined
-> => {
+export const getShifts = async (): Promise<ReturnResponse[]> => {
   const res = await fetch(`${API_BASE_URL}/users/shifts`, {
     method: 'GET',
     headers: { 'Content-Type': 'application/json' }
   })
-  const data = await res.json()
+
   if (!res.ok) {
-    return { status: res.status, data: null }
+    throw new Error(
+      `Error al obtener los turnos: ${res.status} ${res.statusText}`
+    )
   }
+
+  const data = await res.json()
   return data
 }

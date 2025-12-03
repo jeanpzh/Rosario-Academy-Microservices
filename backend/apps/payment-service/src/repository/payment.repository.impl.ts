@@ -230,5 +230,9 @@ export class PaymentRepository implements PaymentRepositoryPort {
       transaction_reference: paymentData.transaction_reference,
       subscription_id: subscription.id
     })
+
+    // Invalidate enrollment requests cache after payment is processed
+    await this.cache.delete(`enrollment_requests_${athleteId}`)
+    Logger.log(`Invalidated enrollment_requests cache for athlete ${athleteId}`)
   }
 }

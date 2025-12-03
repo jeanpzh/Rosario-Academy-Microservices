@@ -8,6 +8,8 @@ import {
 } from '../actions/reutilizableActions'
 import { UserProvider } from '@/contexts/user-context'
 
+export const dynamic = 'force-dynamic'
+
 interface DashboardLayoutProps {
   children: ReactNode
 }
@@ -28,9 +30,10 @@ export default async function DashboardLayout({
   }
 
   const enrollmentInfo = await getEnrollmentInfo(userId)
-
+  console.log({ enrollmentInfo })
 
   const isApproved = enrollmentInfo?.status === 'approved'
+  console.log({ isApproved })
   const linksByStatus = isApproved ? linksApproved : linksPending
 
   return (

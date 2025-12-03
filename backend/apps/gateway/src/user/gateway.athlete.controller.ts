@@ -22,13 +22,13 @@ import { plainToInstance } from 'class-transformer'
 import { ScheduleResponse } from '../dto/athlete-schedule-response.dto'
 
 @Controller('athletes')
-@UseInterceptors(CacheInterceptor)
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class AthletesController {
   constructor(
     @Inject('USER_SERVICE') private readonly userClient: ClientProxy
   ) {}
 
+  @UseInterceptors(CacheInterceptor)
   @Get(':id')
   @Roles(UserRole.ADMIN, UserRole.AUXILIAR, UserRole.ATHLETE)
   async getById(@Param('id') id: string): Promise<AthleteDetailsResponse> {
@@ -38,12 +38,14 @@ export class AthletesController {
     return plainToInstance(AthleteDetailsResponse, athlete)
   }
 
+  @UseInterceptors(CacheInterceptor)
   @Get()
   @Roles(UserRole.ADMIN, UserRole.AUXILIAR)
   async getAll() {
     return await firstValueFrom(this.userClient.send('get_all_athletes', {}))
   }
 
+  @UseInterceptors(CacheInterceptor)
   @Get('distribution')
   @Roles(UserRole.ADMIN, UserRole.AUXILIAR)
   async getDistribution() {

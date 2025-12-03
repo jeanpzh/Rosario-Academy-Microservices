@@ -51,19 +51,61 @@ export const getEnrollmentInfo = async (
     console.error('No auth token found in cookies')
     return null
   }
-  const res = await fetch(
-    `${API_BASE_URL}/athletes/${id}/enrollment-requests`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`
+  try {
+    const res = await fetch(
+      `${API_BASE_URL}/athletes/${id}/enrollment-requests`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
+        cache: 'no-store'
       }
+    )
+    if (!res.ok) {
+      console.log('Failed to fetch enrollment info:', res.statusText)
+      return null
     }
-  )
-  if (!res.ok) {
-    throw new Error('Error fetching enrollment info')
+    const data = await res.json()
+    console.log('NO TIENE SENTIDO', { data })
+    return data
+  } catch (error) {
+    console.error('Error fetching enrollment info:', error)
+    return null
   }
-  const data = await res.json()
-  return data
+}
+
+/**
+ * Get payments for an athlete by ID.
+ *
+ * @param id - The athlete's user ID.
+ * @returns Array of payments or null if error.
+ */
+export const getAthletePayments = async (id: string): Promise<any[] | null> => {
+  if (!id || id === 'undefined') {
+    console.error('Invalid athlete ID provided:', id)
+    return null
+  }
+  const token = await getToken()
+  if (!token) {
+    console.error('No auth token found in cookies')
+    return null
+  }
+  try {
+    const res = await fetch(`${API_BASE_URL}/payment/athlete/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    })
+    if (!res.ok) {
+      return null
+    }
+    const data = await res.json()
+    return data
+  } catch (error) {
+    console.error('Error fetching athlete payments:', error)
+    return null
+  }
 }
 
 /**

@@ -20,35 +20,7 @@ import { useQueryClient } from '@tanstack/react-query'
 
 export function PaymentDashboard() {
   const { userId } = useUser()
-  const searchParams = useSearchParams()
-  const router = useRouter()
-  const queryClient = useQueryClient()
-
-  // Detectar si el usuario viene de Mercado Pago (después de un pago)
-  useEffect(() => {
-    const status = searchParams.get('status')
-    const paymentId = searchParams.get('payment_id')
-    const collectionStatus = searchParams.get('collection_status')
-
-    // Si viene de Mercado Pago con parámetros de pago
-    if (status || paymentId || collectionStatus) {
-      // Invalidar todas las queries relacionadas con pagos para forzar refetch
-      queryClient.invalidateQueries({ queryKey: ['payments'] })
-      queryClient.invalidateQueries({ queryKey: ['enrollmentRequests'] })
-
-      // Mostrar mensaje según el estado del pago
-      if (status === 'approved' || collectionStatus === 'approved') {
-        toast.success('¡Pago realizado con éxito!')
-      } else if (status === 'pending' || collectionStatus === 'pending') {
-        toast.info('Tu pago está pendiente de confirmación')
-      } else if (status === 'failure' || collectionStatus === 'rejected') {
-        toast.error('El pago no pudo ser procesado')
-      }
-
-      // Limpiar los parámetros de la URL para evitar re-invalidaciones
-      router.replace('/dashboard/athlete/payments', { scroll: false })
-    }
-  }, [searchParams, queryClient, router])
+ 
   const { data: profile, isLoading } = useFetchFullProfile({ userId })
   const { data: enrollmentRequests, isLoading: isLoadingEnrollment } =
     useFetchEnrollmentRequests({ userId })
@@ -111,7 +83,10 @@ export function PaymentDashboard() {
       </header>
       <main className='container mx-auto space-y-8 p-4'>
         <PaymentStatus
-          isPaid={enrollmentRequests?.status === 'approved'}
+          isPaid={
+            enrollmentRequests?.status === 'approved' ||
+            (payments !== undefined && payments.length > 0)
+          }
           onPayNow={handleRedirectToPayment}
           last_payment_date={
             lastPayment?.payment_date

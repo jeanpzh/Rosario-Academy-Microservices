@@ -58,7 +58,7 @@ export function EditProfileForm({
       maternalLastName: user?.maternalLastName,
       phone: user?.phone
     })
-  const daysRemaining = getDaysRemaining(user.lastAvatarChange)
+  const daysRemaining = getDaysRemaining(user?.lastAvatarChange)
   return (
     <>
       <form className='flex flex-col gap-4 p-8'>

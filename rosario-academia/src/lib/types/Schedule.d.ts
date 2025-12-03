@@ -5,4 +5,5 @@ interface Schedule {
   start_time: string | null
   end_time: string | null
   level: string | null
+  plan_id: string | null
 }

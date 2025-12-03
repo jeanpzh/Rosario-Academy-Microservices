@@ -19,7 +19,11 @@ export abstract class AthleteRepository {
   abstract getScheduleFromLevel(
     level: 'beginner' | 'intermediate' | 'advanced'
   ): Promise<number>
-  abstract assignSchedule(athleteId: string, scheduleId: number): Promise<void>
+  abstract assignSchedule(
+    athleteId: string,
+    scheduleId: number,
+    planId?: string
+  ): Promise<void>
   abstract updateEnrollment(
     athleteId: string,
     subscriptionId: string

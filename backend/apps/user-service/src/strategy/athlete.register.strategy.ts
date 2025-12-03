@@ -24,6 +24,11 @@ export class AthleteRegisterStrategy implements UserStrategy {
     await this.athleteRepository.save(athlete)
     const assignedSchedule =
       await this.athleteRepository.getScheduleFromLevel(level)
-    await this.athleteRepository.assignSchedule(userData.id, assignedSchedule)
+    const planId = metadata?.planId as string | undefined
+    await this.athleteRepository.assignSchedule(
+      userData.id,
+      assignedSchedule,
+      planId
+    )
   }
 }

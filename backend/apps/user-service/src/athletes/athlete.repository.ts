@@ -45,7 +45,11 @@ export class AthleteRepositoryImpl implements AthleteRepository {
     }
     return data.schedule_id
   }
-  async assignSchedule(athleteId: string, scheduleId: number): Promise<void> {
+  async assignSchedule(
+    athleteId: string,
+    scheduleId: number,
+    planId?: string
+  ): Promise<void> {
     const { error } = await this.supabaseClient
       .schema('users')
       .from('enrollment_requests')
@@ -53,6 +57,7 @@ export class AthleteRepositoryImpl implements AthleteRepository {
         athlete_id: athleteId,
         status: 'pending',
         requested_schedule_id: scheduleId,
+        requested_plan_id: planId ?? null,
         request_date: new Date().toISOString()
       })
     if (error) {
@@ -290,21 +295,18 @@ export class AthleteRepositoryImpl implements AthleteRepository {
   }
   async getEnrollmentRequests(athleteId: string): Promise<any> {
     try {
-      const cached = await this.cache.get<any>(
-        `enrollment_requests_${athleteId}`
-      )
-      if (cached) {
-        Logger.log(
-          `Cache hit for enrollment requests ${JSON.stringify(cached)}`
-        )
-        return cached
-      }
       const { data, error } = await this.supabaseClient
         .schema('users')
         .from('enrollment_requests')
-        .select('requested_schedule_id(plan_id, schedule_id), status')
+        .select(
+          'requested_schedule_id(plan_id, schedule_id), status, request_date'
+        )
         .eq('athlete_id', athleteId)
-        .single()
+        .order('request_date', { ascending: false })
+
+      Logger.log(
+        `Fetched enrollment requests for athlete ${athleteId}: ${JSON.stringify(data)}`
+      )
 
       if (error) {
         Logger.error(`Error fetching enrollment requests: ${error.message}`)
@@ -312,8 +314,19 @@ export class AthleteRepositoryImpl implements AthleteRepository {
           'Error al obtener las solicitudes de inscripción'
         )
       }
-      await this.cache.set(`enrollment_requests_${athleteId}`, data, 300)
-      return data
+
+      if (!data || data.length === 0) {
+        return null
+      }
+
+      // Priorizar el request aprobado si existe
+      const approvedRequest = data.find((req) => req.status === 'approved')
+      if (approvedRequest) {
+        return approvedRequest
+      }
+
+      // Si no hay aprobado, devolver el más reciente
+      return data[0]
     } catch (error) {
       Logger.error(
         `Failed to fetch enrollment requests: ${error.message}`,

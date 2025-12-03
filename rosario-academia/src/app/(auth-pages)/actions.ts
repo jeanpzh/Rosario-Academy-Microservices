@@ -308,6 +308,7 @@ interface ReturnResponse {
   name: string
   description: string
   spots: number
+  planId: string
 }
 
 /**
@@ -327,7 +328,6 @@ export const getShifts = async (): Promise<
   })
   const data = await res.json()
   if (!res.ok) {
-    console.log(data)
     return { status: res.status, data: null }
   }
   return data

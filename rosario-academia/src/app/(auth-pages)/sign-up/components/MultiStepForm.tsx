@@ -30,7 +30,6 @@ export default function MultiStepForm({ steps }: { steps: FormStep[] }) {
   })
   const [currentStepIndex, setCurrentStepIndex] = useState(0)
   const currentStep = steps[currentStepIndex]
-  const { push } = useRouter()
   const { mutateAsync: signUp, isPending } = useSignUp()
 
   const nextStep = async () => {
@@ -67,7 +66,7 @@ export default function MultiStepForm({ steps }: { steps: FormStep[] }) {
   async function onSubmit(data: SignupSchema) {
     toast.promise(signUp(data), {
       loading: 'Registrando usuario...',
-      success: 'Usuario registrado correctamente',
+      success: 'Usuario registrado correctamente'
     })
   }
 

@@ -33,10 +33,6 @@ export default async function DashboardLayout({
   const isApproved = enrollmentInfo?.status === 'approved'
   const linksByStatus = isApproved ? linksApproved : linksPending
 
-  if (!athleteData) {
-    return redirect('/sign-in')
-  }
-
   return (
     <UserProvider value={{ userId: userId, email: athleteData.email }}>
       <div className='flex min-h-screen w-full max-md:flex max-md:flex-col'>

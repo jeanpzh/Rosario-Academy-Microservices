@@ -63,13 +63,17 @@ export const stepOne = object({
 })
 
 export const stepTwo = object({
-  level: z.string().min(1, { message: 'Debes seleccionar un nivel' })
+  level: z.string().min(1, { message: 'Debes seleccionar un nivel' }),
+  planId: z.string().min(1)
 })
 
 export const signUpSchema = stepOne.and(stepTwo)
 export type SignupSchema = z.infer<typeof signUpSchema>
 
-export type SignupRequest = Omit<SignupSchema, 'confirmPassword' | 'level'> & {
+export type SignupRequest = Omit<
+  SignupSchema,
+  'confirmPassword' | 'level' | 'planId'
+> & {
   role: string
   metadata: {
     level: string

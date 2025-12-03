@@ -348,7 +348,18 @@ export class AthleteRepositoryImpl implements AthleteRepository {
         await this.supabaseClient.auth.admin.createUser({
           email: data.email,
           password: password,
-          email_confirm: true
+          email_confirm: true,
+          user_metadata: {
+            first_name: data.first_name,
+            paternal_last_name: data.paternal_last_name,
+            maternal_last_name: data.maternal_last_name,
+            birth_date: data.birth_date,
+            dni: data.dni,
+            level: data.level,
+            role: 'deportista',
+            avatar_url: data.avatar_url || null,
+            phone: data.phone
+          }
         })
 
       if (signupError || !signupData.user) {

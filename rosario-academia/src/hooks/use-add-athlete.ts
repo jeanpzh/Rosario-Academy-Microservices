@@ -25,7 +25,9 @@ export const addAthlete = async (data: AthleteFormData, file?: Blob | null) => {
 
   const result = await response.json()
   if (!response.ok) {
-    throw new Error(result.error || 'Error al registrar deportista')
+    const errorMessage =
+      result.message || result.error || 'Error al registrar deportista'
+    throw new Error(errorMessage)
   }
   return result
 }
@@ -54,9 +56,9 @@ export const useAddAthleteMutation = () => {
     },
 
     onError: (error) => {
-      if (error instanceof Error) {
-        toast.error(error.message)
-      }
+      const message =
+        error instanceof Error ? error.message : 'Error al registrar deportista'
+      toast.error(message)
     }
   })
 }

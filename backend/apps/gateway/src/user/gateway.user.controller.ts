@@ -11,7 +11,9 @@ import {
   Logger,
   Request,
   Put,
-  Delete
+  Delete,
+  HttpException,
+  HttpStatus
 } from '@nestjs/common'
 import { Inject } from '@nestjs/common'
 import { ClientProxy } from '@nestjs/microservices'
@@ -212,28 +214,34 @@ export class UsersController {
     description: 'Invalid input data'
   })
   async createAthlete(@Body() body: any, @UploadedFile() file?: any) {
-    let avatarUrl: string | null = null
-    if (file) {
-      avatarUrl = await this.cloudinaryService.uploadAvatar(file)
-    }
+    try {
+      let avatarUrl: string | null = null
+      if (file) {
+        avatarUrl = await this.cloudinaryService.uploadAvatar(file)
+      }
 
-    const athleteData = {
-      first_name: body.first_name,
-      paternal_last_name: body.paternal_last_name,
-      maternal_last_name: body.maternal_last_name,
-      birth_date: body.birth_date,
-      dni: body.dni,
-      phone: body.phone,
-      email: body.email,
-      level: body.level,
-      height: body.height,
-      weight: body.weight,
-      avatar_url: avatarUrl
-    }
+      const athleteData = {
+        first_name: body.first_name,
+        paternal_last_name: body.paternal_last_name,
+        maternal_last_name: body.maternal_last_name,
+        birth_date: body.birth_date,
+        dni: body.dni,
+        phone: body.phone,
+        email: body.email,
+        level: body.level,
+        height: body.height,
+        weight: body.weight,
+        avatar_url: avatarUrl
+      }
 
-    return await firstValueFrom(
-      this.userClient.send('create_athlete', athleteData)
-    )
+      return await firstValueFrom(
+        this.userClient.send('create_athlete', athleteData)
+      )
+    } catch (error: any) {
+      const message = error?.message || 'Error al crear el deportista'
+      const statusCode = error?.statusCode || HttpStatus.BAD_REQUEST
+      throw new HttpException(message, statusCode)
+    }
   }
 
   @Put('athlete/:id')

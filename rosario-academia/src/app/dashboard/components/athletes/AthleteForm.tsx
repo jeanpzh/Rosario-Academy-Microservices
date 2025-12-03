@@ -15,6 +15,7 @@ import Image from 'next/image'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useAthleteModalStore } from '@/lib/stores/useAthleteStore'
 import { DialogTitle } from '@/components/ui/dialog'
+import { toast } from 'sonner'
 
 export default function AthleteForm({
   mode
@@ -22,7 +23,13 @@ export default function AthleteForm({
   mode: 'create' | 'edit' | undefined
 }) {
   const { currentItem } = useAthleteModalStore()
-  const { control, reset, handleSubmit, watch } = useForm<AthleteFormData>({
+  const {
+    control,
+    reset,
+    handleSubmit,
+    watch,
+    formState: { errors }
+  } = useForm<AthleteFormData>({
     resolver: zodResolver(athleteFormSchema)
   })
   const avatarUrl = watch('avatar_url')
@@ -57,16 +64,21 @@ export default function AthleteForm({
     try {
       if (mode === 'create') {
         if (!avatarFile) {
-          console.error('No se ha seleccionado una imagen')
+          toast.error('Debe seleccionar una imagen de perfil')
           return
         }
         addMutation.mutate({ data, file: avatarFile })
       } else {
         updateMutation.mutate(data)
       }
-    } catch (error) {
-      console.error('Error en submit:', error)
+    } catch {
+      toast.error('Error al registrar deportista')
     }
+  }
+
+  // Mostrar errores de validación como toasts
+  const onError = () => {
+    toast.error('Complete los campos requeridos')
   }
 
   // Resetea el formulario según el modo
@@ -139,7 +151,7 @@ export default function AthleteForm({
         </div>
 
         <form
-          onSubmit={handleSubmit(onSubmit)}
+          onSubmit={handleSubmit(onSubmit, onError)}
           className='grid w-full grid-cols-1 gap-4 md:grid-cols-2'
         >
           <TextField

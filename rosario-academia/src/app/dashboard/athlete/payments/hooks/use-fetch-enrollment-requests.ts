@@ -1,10 +1,18 @@
 import { API_BASE_URL } from '@/lib/config'
 import { useQuery } from '@tanstack/react-query'
 
+interface PaymentEnrollmentRequest {
+  status: 'rejected' | 'approved' | 'pending'
+  requested_schedule_id: {
+    plan_id: string
+    schedule_id: string
+  }
+}
+
 export function useFetchEnrollmentRequests({ userId }: { userId: string }) {
   return useQuery({
     queryKey: ['enrollmentRequests', userId],
-    queryFn: async (): Promise<EnrollmentRequest> => {
+    queryFn: async (): Promise<PaymentEnrollmentRequest> => {
       const response = await fetch(
         `${API_BASE_URL}/athletes/${userId}/enrollment-requests`,
         {
@@ -19,6 +27,7 @@ export function useFetchEnrollmentRequests({ userId }: { userId: string }) {
       }
 
       const data = await response.json()
+      console.log({ DATAAA: data })
       return data
     },
     refetchOnWindowFocus: true,

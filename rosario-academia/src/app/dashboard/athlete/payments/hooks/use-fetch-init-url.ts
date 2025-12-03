@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 export const useFetchInitUrl = (data: {
   userId: string
   planId: string
-  scheduleId: number
+  scheduleId: string
 }) => {
   return useQuery({
     queryKey: ['init-url', data.userId],
@@ -17,8 +17,8 @@ export const useFetchInitUrl = (data: {
         credentials: 'include',
         body: JSON.stringify({
           userId: data.userId,
-          planId: '61c0ae93-df4e-4bc7-847b-42b4dcc07cea',
-          schedule_id: 2
+          planId: data.planId,
+          schedule_id: data.scheduleId
         })
       })
       if (!response.ok) {

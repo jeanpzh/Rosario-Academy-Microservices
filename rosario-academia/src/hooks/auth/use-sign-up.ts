@@ -23,7 +23,7 @@ export const useSignUp = () => {
         role: 'deportista',
         metadata: {
           level: userData.level,
-          planId: '1'
+          planId: userData.planId
         }
       }
 

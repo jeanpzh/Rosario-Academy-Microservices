@@ -1,52 +1,37 @@
+version: '3.8'
 
 services:
   gateway:
-    build:
-      context: .
-      target: gateway
+    image: ghcr.io/jeanpzh/rosario-academy-backend-gateway:latest
     restart: always
-    hostname: gateway
-    env_file:
-      - .env.local
+    env_file: .env
     ports:
-      - "8000:8000" 
+      - "8000:8000"
     networks:
       - backend
     depends_on:
       - redis
 
   auth-service:
-    build:
-      context: .
-      target: auth-service
+    image: ghcr.io/jeanpzh/rosario-academy-backend-auth-service:latest
     restart: always
-    hostname: auth-service
-    env_file:
-      - .env.local
+    env_file: .env
     networks:
       - backend
 
   user-service:
-    build:
-      context: .
-      target: user-service
+    image: ghcr.io/jeanpzh/rosario-academy-backend-user-service:latest
     restart: always
-    hostname: user-service
-    env_file:
-      - .env.local
+    env_file: .env
     environment:
       - KAFKA_BROKERS=redpanda:29092
     networks:
       - backend
 
   payment-service:
-    build:
-      context: .
-      target: payment-service
+    image: ghcr.io/jeanpzh/rosario-academy-backend-payment-service:latest
     restart: always
-    hostname: payment-service
-    env_file:
-      - .env.local
+    env_file: .env
     environment:
       - KAFKA_BROKERS=redpanda:29092
     networks:
@@ -58,9 +43,6 @@ services:
   redis:
     image: redis:7.2-alpine
     restart: always
-    hostname: redis
-    ports:
-      - "6379:6379"
     networks:
       - backend
     volumes:
@@ -69,7 +51,6 @@ services:
 
   redpanda:
     image: docker.redpanda.com/redpandadata/redpanda:v23.3.1
-    container_name: redpanda
     restart: always
     command:
       - redpanda start
@@ -86,7 +67,6 @@ services:
     ports:
       - "9092:9092"
       - "8081:8081"
-      - "8082:8082"
     networks:
       - backend
     volumes:
@@ -97,25 +77,10 @@ services:
       timeout: 5s
       retries: 5
 
-  kafka-ui:
-    image: provectuslabs/kafka-ui:latest
-    container_name: kafka-ui
-    restart: always
-    depends_on:
-      - redpanda
-    ports:
-      - "8080:8080"
-    environment:
-      KAFKA_CLUSTERS_0_NAME: local
-      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: redpanda:29092
-    networks:
-      - backend
-
 networks:
   backend:
     driver: bridge
 
 volumes:
-  app_data:
   redis_data:
   redpanda_data:

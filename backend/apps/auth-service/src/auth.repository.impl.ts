@@ -30,6 +30,7 @@ import {
   isSupabaseAuthError
 } from './type-guards'
 
+
 @Injectable()
 export class AuthRepositoryImpl implements AuthRepository {
   private readonly logger = new Logger(AuthRepositoryImpl.name)

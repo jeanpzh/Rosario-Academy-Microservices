@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import styles from './styles.module.css'
 import { SubmitButton } from '@/components/submit-button'
 import { Input } from '@/components/ui/input'
@@ -8,11 +8,12 @@ import { Label } from '@/components/ui/label'
 import Link from 'next/link'
 import PasswordInput from '@/components/password-input'
 import { toast } from 'sonner'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useSignIn } from '@/hooks/auth/use-signin'
 import { FormProvider, useForm } from 'react-hook-form'
 import { signInSchemaType, signInSchema } from '../schemas/sign-in-schema'
 import { zodResolver } from '@hookform/resolvers/zod'
+
 
 const SignIn = () => {
   const { control } = useForm<signInSchemaType>({
@@ -20,6 +21,36 @@ const SignIn = () => {
   })
   const { mutate: signIn, isPending: isLoading } = useSignIn()
   const [isRightPanelActive, setIsRightPanelActive] = useState(false)
+  const searchParams = useSearchParams()
+
+  useEffect(() => {
+    // Check for error in query params
+    const error = searchParams.get('error')
+    if (error) {
+      toast.error(error)
+      // Clean up the URL
+      const url = new URL(window.location.href)
+      url.searchParams.delete('error')
+      window.history.replaceState({}, '', url.toString())
+    }
+
+    // Check for error in hash fragment (some OAuth providers/Supabase return errors here)
+    const hash = window.location.hash
+    if (hash && hash.includes('error=')) {
+      const params = new URLSearchParams(hash.substring(1)) // remove #
+      const errorDescription =
+        params.get('error_description') || params.get('error')
+      if (errorDescription) {
+        toast.error(errorDescription.replace(/\+/g, ' '))
+        // Clean up the URL
+        window.history.replaceState(
+          {},
+          '',
+          window.location.pathname + window.location.search
+        )
+      }
+    }
+  }, [searchParams])
 
   const handleRegisterClick = () => {
     setIsRightPanelActive(true)

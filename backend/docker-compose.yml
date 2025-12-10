@@ -70,7 +70,7 @@ services:
     networks:
       - backend
     volumes:
-      - redpanda_data:/var/lib/redpanda/data
+      - /var/lib/redpanda:/var/lib/redpanda/data
     healthcheck:
       test: ["CMD-SHELL", "rpk cluster health | grep -E 'Healthy|OK'"]
       interval: 10s
